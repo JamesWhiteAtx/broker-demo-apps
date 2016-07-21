@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
 
+    <link rel="stylesheet" href="style/bootstrap.css">
+    <link rel="stylesheet" href="style/font-awesome.css">
+    <link rel="stylesheet" href="style/base.css">
+
     <script src="node_modules/core-js/client/shim.min.js"></script>
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>    
     <script src="node_modules/systemjs/dist/system.src.js"></script>
     <script src="node_modules/typescript/lib/typescript.js"></script>
 
@@ -15,7 +21,10 @@
       System.import('app').catch(function(err){ console.error(err); });
     </script>
   </head>
-  <body>
-    <h1>DEMOns 1</h1>
+  
+  <!-- 3. Display the application -->
+  <body class="demo">
+    <demo-app>Loading...</demo-app>
   </body>
+  
 </html>

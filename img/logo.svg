@@ -1,0 +1,20 @@
+<svg width="330.1" height="73.3" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <g id="svg_1">
+   <path id="svg_4" d="m124.29995,-0.05c-20.3,0 -36.7,16.4 -36.7,36.7s16.4,36.7 36.7,36.7c20.3,0 36.7,-16.4 36.7,-36.7s-16.5,-36.7 -36.7,-36.7zm0,67.2c-16.9,0 -30.6,-13.7 -30.6,-30.6c0,-16.9 13.7,-30.6 30.6,-30.6c16.9,0 30.6,13.7 30.6,30.6c-0.1,16.9 -13.8,30.6 -30.6,30.6z" fill="#6A747C"/>
+   <path id="svg_6" d="m40.302007,-0.05c-20.3,0 -36.7,16.4 -36.7,36.7s16.4,36.7 36.7,36.7c20.3,0 36.7,-16.4 36.7,-36.7s-16.5,-36.7 -36.7,-36.7zm0,67.2c-16.9,0 -30.6,-13.7 -30.6,-30.6c0,-16.9 13.7,-30.6 30.6,-30.6c16.9,0 30.6,13.7 30.6,30.6c-0.1,16.9 -13.8,30.6 -30.6,30.6z" fill="#6A747C"/>
+   <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="56" id="svg_7" y="55.898637" x="20.67853" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="null" fill="#6A747C">S</text>
+   <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="56" id="svg_8" y="55.897014" x="103.176509" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="null" fill="#6A747C">H</text>
+   <path id="svg_9" d="m206.547937,-0.05c-20.3,0 -36.7,16.4 -36.7,36.7s16.4,36.7 36.7,36.7c20.3,0 36.7,-16.4 36.7,-36.7s-16.5,-36.7 -36.7,-36.7zm0,67.2c-16.9,0 -30.6,-13.7 -30.6,-30.6c0,-16.9 13.7,-30.6 30.6,-30.6c16.9,0 30.6,13.7 30.6,30.6c-0.1,16.9 -13.8,30.6 -30.6,30.6z" fill="#6A747C"/>
+   <path id="svg_10" d="m290.045894,-0.05c-20.3,0 -36.7,16.4 -36.7,36.7s16.4,36.7 36.7,36.7c20.3,0 36.7,-16.4 36.7,-36.7s-16.5,-36.7 -36.7,-36.7zm0,67.2c-16.9,0 -30.6,-13.7 -30.6,-30.6c0,-16.9 13.7,-30.6 30.6,-30.6c16.9,0 30.6,13.7 30.6,30.6c-0.1,16.9 -13.8,30.6 -30.6,30.6z" fill="#6A747C"/>
+   <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="56" id="svg_11" y="55.899968" x="184.174528" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="null" fill="#6A747C">O</text>
+   <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="56" id="svg_12" y="55.898619" x="272.672364" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="null" fill="#6A747C">P</text>
+  </g>
+ </g>
+</svg>
