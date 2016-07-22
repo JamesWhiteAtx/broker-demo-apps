@@ -1,4 +1,4 @@
-import { Injectable, Inject, Component } from '@angular/core';
+import { OnInit, Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavComponent } from './nav.component'
 
@@ -7,8 +7,12 @@ import { NavComponent } from './nav.component'
   template: '<demo-nav></demo-nav> <h1>My First Angular Pepper App</h1>',
   directives: [NavComponent]
 })
-export class AppComponent { 
-  public constructor(@Inject(Title) private titleService: Title ) { }
+export class AppComponent implements OnInit { 
+  public constructor(private titleService: Title ) { }
+
+  ngOnInit() {
+    this.titleService.setTitle( 'ShopCo' );
+  }
 
   public setTitle( newTitle: string) {
     this.titleService.setTitle( newTitle );

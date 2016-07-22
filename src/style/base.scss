@@ -1,0 +1,123 @@
+
+@import "bootstrap/variables";
+@import "bootstrap/mixins";
+
+body {
+    padding-top: $navbar-height;
+}
+.demo {
+  .navbar {
+    .navbar-brand {
+      width: 200px;
+      height: $navbar-height;
+      padding: 10px 10px;
+
+      .img-responsive {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        height: initial;
+      }
+    }
+  }
+  .shopping {
+    .recommendations {
+      background-color: #c7c8c9;
+      h1 {
+        text-align: center;
+        color: #fff;
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+    }
+    .product {
+      padding-top: 10px;
+      padding-bottom: 10px;
+
+      figure {
+        img {
+          height: 200px;
+          margin: auto;
+        }
+      }
+      .hover-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background-color: transparent;
+
+        padding: 50px 20px 20px 20px;
+        text-align: center;
+
+        @include transition(background-color .5s ease-in-out);
+
+        h2, h5, hr {
+          color: #fff;
+          opacity: 0;
+        }
+        hr {
+          width: 0;
+        }
+        &:hover {
+          background-color: rgba(0,0,0,0.5);
+          h2, h5, hr {
+            opacity: 1;
+            @include transition(width .5s ease-in-out);
+          }
+          hr {
+            width: 80px;
+          } 
+        }
+      }
+    }
+  }
+  .qty-spin {
+    @include user-select(none);
+    .fa.dec, .fa.inc {
+      cursor: pointer;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+  }
+  .buying {
+    .img-responsive {
+      height: 300px;
+    }  
+    .btn.add {
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+  }
+  .reviewing {
+    .row {
+      &.product {
+        border-top: 1px solid #bbb;
+        .img-responsive {
+          height: 100px;
+          width: 100px;
+        }  
+        .remove {
+          h4 {
+            cursor: pointer;
+          }
+        }
+      }
+      &.total {
+        border-top: 2px solid #bbb;
+      }
+    } 
+    .controls {
+      button {
+        margin-top: 15px;
+      }
+    }
+  }
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
