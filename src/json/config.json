@@ -1,5 +1,5 @@
 {
-  "IDENTITY_PROVIDER_URL": "/",
+  "IDENTITY_PROVIDER_URL": "/", 
   "RESOURCE_SERVER_URL": "/",
   "AUTHORIZE_ROUTE": "oauth/authorize",
   "LOGOUT_ROUTE": "oauth/logout",

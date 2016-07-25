@@ -1,7 +1,10 @@
 {
   "injectChanges": false,
-  "files": ["./**/*.{html,htm,css,js,ts}"],
+  "files": ["./dist/**/*.{html,htm,css,js,ts}"],
   "watchOptions": {
     "ignored": ["node_modules", "plugin-typescript"]  
-  }
+  },
+  "server": {
+    "baseDir": "./dist" 
+  } 
 }
