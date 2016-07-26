@@ -1,7 +1,6 @@
 const browserSync = require('browser-sync').create();
 const Builder = require('systemjs-builder');
 const del = require('del');
-const extend = require('extend');
 const fs = require('fs');
 const gulp = require('gulp');
 const merge2 = require('merge2');
@@ -23,8 +22,9 @@ const sysjsPkg = "systemjs";
 const sysjsPath = sysjsPkg + "/";
 const plugintsPkg = "plugints";
 const plugintsPath = sysjsPath + plugintsPkg + "/";
-const serveDist = 'dist/';
 const configPath = 'config/';
+
+const serveDist = 'dist/';
 //const docsDist = '/Users/jameswhite/Source/deploy/ib2/docs/demo/';
 
 var distPath = '';
@@ -76,7 +76,7 @@ function configure(dist) {
       }
     },
     dist: {
-      reload: distPath + '**/*.{html,htm,css,js,ts,json}',
+      //reload: distPath + '**/*.{html,htm,css,js,ts,json}',
       clean: distPath + '**/*',
       app: distPath + 'app/',
       font: distPath + 'fonts/',
@@ -84,6 +84,7 @@ function configure(dist) {
       style: distPath + stylePath,
       config: distPath + configPath,
       vendor: distPath + vendorPath,
+      ng: distPath + vendorPath + ngPath,
       sysjs: distPath + vendorPath + sysjsPath,
       plugints: distPath + vendorPath + plugintsPath, 
       styles: {
@@ -95,10 +96,19 @@ function configure(dist) {
   };
 }
 
+function getArg(key) {
+  var index = process.argv.indexOf(key);
+  var next = process.argv[index + 1];
+  return (index < 0) ? null : (!next || next[0] === "-") ? true : next;
+}
 // default to configuring for local development server
 configServe();
 
 function configServe(cb) {
+  
+  var dist = getArg("--dist");
+  console.log('dist is', dist);
+  
   configure(serveDist);
   if (cb) {
     cb();
@@ -197,6 +207,24 @@ function npmScript() {
 
 gulp.task('script:npm', npmScript);
 
+// ANGULAR MODULES 
+
+function ngScript() {
+  var ngPkgs = cfg.src.vendor.ng.pkgs.map(function(pkgName) {
+    return cfg.src.vendor.ng.root + pkgName + '/bundles/' + pkgName + '.umd.js';
+  });
+ //var ngPkgs = makeNgPkgNames();
+ //console.log(ngPkgs);
+ //var allNgExpr = ngPkgs.join(' + ');
+  return gulp
+    .src(ngPkgs)
+    //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
+    //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
+    .pipe(gulp.dest(cfg.dist.ng)); 
+}
+
+gulp.task('script:ng', ngScript);
+
 // SYSTEMJS SCRIPT
 
 function sysjsNpm() {
@@ -231,7 +259,7 @@ function sysjsLoad() {
 
 gulp.task('script:sysjs:load', sysjsLoad);
 
-//CONSOLIDATED STYLE TASKS
+//CONSOLIDATED SYSTEMJS TASKS
 
 var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);
 
@@ -263,72 +291,78 @@ function makeNgPkgNames() {
   });
 }
 
-function makeBaseSysConfig() {
+function makeBundleSysJsCfg() {
   var map = {
     [rxjsPkg]: npmPath + rxjsPkg,
-    //'symbol-observable': 'node_modules/symbol-observable', // rxjs@5.0.0-beta.10 https://github.com/ReactiveX/rxjs/issues/1664
     [ngPkg]: npmPath + ngPkg
   };
-
   var packages = {
     rxjs: {
       defaultExtension: 'js' 
     }
-    //'symbol-observable': { defaultExtension: 'js', main: 'index.js'},
   };
-  
+
   cfg.src.vendor.ng.pkgs.forEach(function(pkgName) {
     packages[ngPath + pkgName] = { main: 'bundles/' + pkgName + '.umd.js', defaultExtension: 'js' };
   });
 
-  return {
-    //defaultJSExtensions: true,
-    map: map,
-    packages: packages
-  };  
+  var sysCfg = {
+    'paths': { [vendorPath + '*']: npmPath + '*' },
+    'map': map,
+    'packages': packages
+  };
+
+  return sysCfg;  
 }
 
-function makeDistSysConfig() {
+function makeDistSysJsCfg() {
+  var map = {
+    [appPkg]: appPkg,
+    [tsPkg]: vendorPkg,
+    [plugintsPkg]: vendorPath + plugintsPath + 'plugin.js',
+    [rxjsPkg]: vendorPath + rxjsPkg
+  };
 
-  var sysCfg = extend(true, makeBaseSysConfig(), {
+  cfg.src.vendor.ng.pkgs.forEach(function(pkgName) {
+    map[ngPath + pkgName] = vendorPath + ngPath + pkgName + '.umd.js';
+  });
+
+  var packages = {
+    [appPkg]:    { 
+      'main': 'main.ts',  
+      'defaultExtension': 'ts',
+      'meta': {
+        '*.ts': {
+          'loader': plugintsPkg
+        }
+      }
+    },
+    [tsPkg]: {
+      'main': 'typescript.js',
+      'defaultExtension': 'js',
+      'meta': {
+        'typescript.js': {
+          'exports': 'ts'
+        } 
+      }        
+    }
+  };
+
+  var sysCfg = {
+    'map': map,
+    'packages': packages,
     'transpiler': plugintsPkg,
     'typescriptOptions': {
       'tsconfig': true
-    },
-    'map': {
-      [vendorPkg]: vendorPkg,
-      [appPkg]: appPkg,
-      [tsPkg]: vendorPkg,
-      [plugintsPkg]: vendorPath + plugintsPath + 'plugin.js'
-    },
-    'packages': {
-      [appPkg]:    { 
-        'main': 'main.ts',  
-        'defaultExtension': 'ts',
-        'meta': {
-          '*.ts': {
-            'loader': plugintsPkg
-          }
-        }
-      },
-      [tsPkg]: {
-        'main': 'typescript.js',
-        'defaultExtension': 'js',
-        'meta': {
-          'typescript.js': {
-            'exports': 'ts'
-          } 
-        }        
-      }
-    }
-  });
+    }    
+  };
 
   return sysCfg;
 }
 
-function getDistSysConfig() {
+function getDistSysJsCfg() {
   if (!cfg.dist.sysJsConfig) {
-    cfg.dist.sysJsConfig = makeDistSysConfig();
+    cfg.dist.sysJsConfig = makeDistSysJsCfg();
   }
   return cfg.dist.sysJsConfig;
 }
@@ -339,7 +373,7 @@ function writePkgBundle(builder, pkg, trace) {
 
   return builder.bundle(trace, distFile)
   .then(function(output) {
-    var sysJsCfg = getDistSysConfig();
+    var sysJsCfg = getDistSysJsCfg();
     sysJsCfg.bundles = sysJsCfg.bundles || {};
     sysJsCfg.bundles[bundleName] = output.modules;
     return sysJsCfg.bundles[bundleName];
@@ -347,7 +381,7 @@ function writePkgBundle(builder, pkg, trace) {
 }
 
 function ngBundles() {
-  var sysCfg = makeBaseSysConfig();
+  var sysCfg = makeBundleSysJsCfg();
   var builder = new Builder();
   builder.config(sysCfg);
   
@@ -355,18 +389,18 @@ function ngBundles() {
   var allNgExpr = ngPkgs.join(' + ');
   var justNgExpr = '(' + allNgExpr + ') - ['+rxjsPkg+'/**/*]';
 
-  var allNgTrace, justNgTrace, ngRxTrace;
+  var allNgTrace;
   
   return builder.trace(allNgExpr)
   .then(function (trace) {
     allNgTrace = trace;
     return builder.trace(justNgExpr);
   })
-  .then(function (trace) {
-    justNgTrace = trace;
-    return writePkgBundle(builder, ngPkg, justNgTrace);
-  })
-  .then(function () {
+  // .then(function (trace) {
+  //   justNgTrace = trace;
+  //   return writePkgBundle(builder, ngPkg, justNgTrace);
+  // })
+  .then(function (justNgTrace) {
     return builder.subtractTrees(allNgTrace, justNgTrace);
   })
   .then(function (trace) {
@@ -374,7 +408,7 @@ function ngBundles() {
     return writePkgBundle(builder, rxjsPkg, ngRxTrace);
   })
   .then(function () {
-    var sysJsCfg = getDistSysConfig();
+    var sysJsCfg = getDistSysJsCfg();
     return fs.writeFile(cfg.dist.sysjs + 'config.json', 
       JSON.stringify(sysJsCfg, null, 2) , 'utf-8');
   })
@@ -388,6 +422,7 @@ var build = gulp.parallel(
   style, 
   appConfig, 
   npmScript,
+  ngScript,
   sysjsScript,
   configTs, 
   ngApp, 
@@ -400,8 +435,15 @@ gulp.task('build', build);
 
 function server(cb) {
     browserSync.init({
-        server: "./" + distPath,
-        notify: false
+      "injectChanges": false,
+      "files": ["dist/**/*.{html,htm,css,js,ts,json}"],
+      "watchOptions": {
+        "ignored": ["node_modules", "plugin-typescript"]  
+      },
+      "server": {
+        "baseDir": "dist" 
+      },
+      notify: false
     }, cb);
 }
 
@@ -419,15 +461,15 @@ function buildWatch() {
 
 gulp.task('watch:build', buildWatch);
 
-function distWatch(cb) {
-  gulp.watch(cfg.dist.reload, {delay: cfg.dist.delay}, 
-      function reload(cb) {
-        browserSync.reload();
-        cb();
-    });  
-}
+// function distWatch(cb) {
+//   gulp.watch(cfg.dist.reload, {delay: cfg.dist.delay}, 
+//       function reload(cb) {
+//         browserSync.reload();
+//         cb();
+//     });  
+// }
 
-gulp.task('watch:dist', distWatch);
+// gulp.task('watch:dist', distWatch);
 
 // SERVE
 gulp.task('serve', gulp.series(
@@ -435,7 +477,7 @@ gulp.task('serve', gulp.series(
     clean,
     build,
     server,
-    gulp.parallel(distWatch, buildWatch)
+    buildWatch
 ));
 
 // DIST
@@ -444,14 +486,34 @@ gulp.task('dist', gulp.series(
     server
 ));
 
-// DIST
-gulp.task('test', gulp.series(
-    configServe
-    ,clean
-    ,sysjsScript
-    // ,sysjsNpm
-    // ,sysjsTs
-    // , sysjsLoad
-));
+gulp.task('test', function(cb) {
+  var sysCfg = {
+    paths: { 'xxx/*': 'node_modules/*' },
+    map: { rxjs: 'node_modules/rxjs' },
+    packages: { rxjs: { defaultExtension: 'js' } },
 
-  //var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);
+    defaultJSExtensions: true
+  }
+  cfg.src.vendor.ng.pkgs.forEach(function(pkgName) {
+    sysCfg.map[ngPath + pkgName] = npmPath + ngPath + pkgName + '/index.js';
+  });  
+
+  var builder = new Builder();
+  builder.config(sysCfg);
+
+  var ngPkgs = makeNgPkgNames();
+  var allNgExpr = ngPkgs.join(' + ');
+
+  return builder.trace(allNgExpr)
+  .then(function(trace) {
+    return builder.bundle(trace);
+  })
+  .then(function(output) {
+    console.log(output.modules);
+    return output.modules;
+  })
+  ;
+
+});
+
+  //var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);`

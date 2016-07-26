@@ -26,7 +26,6 @@
   "devDependencies": {
     "bootstrap-sass": "^3.3.6",
     "del": "^2.2.1",
-    "extend": "^3.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-concat": "^2.6.0",
     "gulp-load-plugins": "^1.2.4",

@@ -4,7 +4,7 @@ import { NavComponent } from './nav.component'
 
 @Component({
   selector: 'demo-app',
-  template: '<demo-nav></demo-nav> <h1>My First Angular Pepper App</h1>',
+  template: '<demo-nav></demo-nav> <h1>Angular Demo App Template</h1>',
   directives: [NavComponent]
 })
 export class AppComponent implements OnInit { 
