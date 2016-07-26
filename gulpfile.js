@@ -12,7 +12,6 @@ const npmPath = 'node_modules/';
 const sourcePath = 'src/';
 const appPkg = 'app';
 const appPath = appPkg + '/';
-const rootPath = 'root/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
 const ngPkg = '@angular';
@@ -20,11 +19,13 @@ const ngPath = ngPkg + '/';
 const rxjsPkg = 'rxjs';
 const stylePath = 'style/';
 const tsPkg = 'typescript';
-const scriptPath = 'js/';
-// const templatePath = 'templates/';
+const sysjsPkg = "systemjs";
+const sysjsPath = sysjsPkg + "/";
+const plugintsPkg = "plugints";
+const plugintsPath = sysjsPath + plugintsPkg + "/";
 const serveDist = 'dist/';
 const configPath = 'config/';
-const docsDist = '/Users/jameswhite/Source/deploy/ib2/docs/demo/';
+//const docsDist = '/Users/jameswhite/Source/deploy/ib2/docs/demo/';
 
 var distPath = '';
 var cfg = {}
@@ -34,12 +35,12 @@ function configure(dist) {
   cfg = {
     prod: false,
     src: {
-      app:  sourcePath + appPath + '**/*.*',
-      root:  sourcePath + rootPath + '**/*.*',
+      html: sourcePath + '**/*.html',
+      app: sourcePath + appPath + '**/*.*',
       scss: sourcePath + stylePath + '**/*.scss',
       script: sourcePath + 'js/**/*.js',
       img: sourcePath + 'img/**/*.*',
-      json: sourcePath + 'json/**/*.*',
+      config: sourcePath + 'config/**/*.*',
       vendor: {
         bootstrap: sourcePath + vendorPath + 'bootbase.scss',
         awesome: npmPath + 'font-awesome/scss/font-awesome.scss',
@@ -47,16 +48,19 @@ function configure(dist) {
           npmPath + 'font-awesome/fonts/*.*',
           npmPath + 'bootstrap-sass/assets/fonts/**/*.*'
         ],
-        scripts: [
+        npm: [
           npmPath + 'jquery/dist/jquery.js',
           npmPath + 'bootstrap-sass/assets/javascripts/bootstrap.js',
-          npmPath + 'systemjs/dist/system.src.js',
           npmPath + 'typescript/lib/typescript.js',
-          npmPath + 'plugin-typescript/lib/*.js',
           npmPath + 'reflect-metadata/Reflect.js',
           npmPath + 'zone.js/dist/zone.js',
           npmPath + 'core-js/client/shim.min.js'
         ],
+        sysjs: {
+          npm: npmPath + 'systemjs/dist/system.src.js',
+          plugints: npmPath + 'plugin-typescript/lib/*.js',
+          load: sourcePath + sysjsPath + '*.js'
+        }, 
         ng: {
           root: npmPath + ngPath,
           pkgs:  [ 'common', 'compiler', 'core', 'forms',
@@ -80,21 +84,14 @@ function configure(dist) {
       style: distPath + stylePath,
       config: distPath + configPath,
       vendor: distPath + vendorPath,
-      script: distPath + scriptPath,
+      sysjs: distPath + vendorPath + sysjsPath,
+      plugints: distPath + vendorPath + plugintsPath, 
       styles: {
         app: 'app.css',
         vendor: 'vendor.css'
       },
-      // scripts: {
-      //   app: 'app.js',
-      //   vendor: 'vendor.js'
-      // },
       delay: 0
     }
-    // reload: {
-    //   styles: {},
-    //   scripts: {}
-    // }
   };
 }
 
@@ -128,12 +125,11 @@ gulp.task('clean', clean);
 function vendorStyle() {
     return  merge2(
         gulp.src(cfg.src.vendor.awesome)
-            .pipe($.sass().on('error', $.sass.logError)),
+            .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError)),
         gulp.src(cfg.src.vendor.bootstrap)
-            .pipe($.sass(cfg.src.sassopts))
+            .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
             .pipe($.rename('bootstrap.css'))
         )
-        .pipe($.filenames("vendor.styles"))
         .pipe(gulp.dest(cfg.dist.style));
 }
 
@@ -158,67 +154,95 @@ gulp.task('img:app', appImg);
 function appStyle() {
     return gulp
         .src(cfg.src.scss)
-        .pipe($.sass(cfg.src.sassopts))
+        .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
         .pipe($.concat(cfg.dist.styles.app))
-        .pipe($.filenames("app.styles"))
         .pipe(gulp.dest(cfg.dist.style));
 }
 
 gulp.task('style:app', appStyle);
 
-var style = gulp.parallel(vendorStyle, vendorFont, appImg, appStyle
-);
+//CONSOLIDATED STYLE TASKS
+
+var style = gulp.parallel(vendorStyle, vendorFont, appImg, appStyle);
 
 gulp.task('style', style);
 
-// JSON
-function appJson() {
-	return gulp
-        .src(cfg.src.json)
-        .pipe(gulp.dest(cfg.dist.config));
+// CONFIG
+function appConfig() {
+  return gulp
+    .src(cfg.src.config)
+    .pipe(gulp.dest(cfg.dist.config));
 }
 
-gulp.task('json:app', appJson);
+gulp.task('config:app', appConfig);
 
-// ANGLAR APP
+// ANGULAR APP
 function ngApp() {
-	return gulp
-        .src(cfg.src.app)
-        .pipe(gulp.dest(cfg.dist.app));
+  return gulp
+    .src(cfg.src.app)
+    .pipe(gulp.dest(cfg.dist.app));
 }
 
 gulp.task('app:ng', ngApp);
 
-// APP SCRIPTS
-function appScript() {
-	return gulp
-        .src(cfg.src.script)
-        .pipe(gulp.dest(cfg.dist.script));
-}
+// NPM SCRIPTS
 
-gulp.task('script:app', appScript);
-
-// VENDOR SCRIPTS
-
-function vendorScript() {
+function npmScript() {
     return gulp
-        .src(cfg.src.vendor.scripts)
+        .src(cfg.src.vendor.npm)
         //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
         //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
-        //.pipe($.filenames("vendor.scripts"))
         .pipe(gulp.dest(cfg.dist.vendor));
 }
 
-gulp.task('script:vendor', vendorScript);
+gulp.task('script:npm', npmScript);
 
-// ROOT
-function appRoot() {
+// SYSTEMJS SCRIPT
+
+function sysjsNpm() {
+  return gulp
+    .src(cfg.src.vendor.sysjs.npm)
+    //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
+    //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
+    .pipe(gulp.dest(cfg.dist.sysjs));
+}
+
+gulp.task('script:sysjs:npm', sysjsNpm);
+
+// TYPESCRIPT PLUGIN SCRIPT
+
+function sysjsTs() {
+  return gulp
+    .src(cfg.src.vendor.sysjs.plugints)
+    //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
+    //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
+    .pipe(gulp.dest(cfg.dist.plugints));
+}
+
+gulp.task('script:sysjs:ts', sysjsTs);
+
+// SYSTEMJS LOAD SCRIPTS
+
+function sysjsLoad() {
+  return gulp
+    .src(cfg.src.vendor.sysjs.load)
+    .pipe(gulp.dest(cfg.dist.sysjs));
+}
+
+gulp.task('script:sysjs:load', sysjsLoad);
+
+//CONSOLIDATED STYLE TASKS
+
+var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);
+
+// HTML
+function appHtml() {
 	return gulp
-        .src(cfg.src.root)
+        .src(cfg.src.html)
         .pipe(gulp.dest(distPath));
 }
 
-gulp.task('root:app', appRoot);
+gulp.task('html:app', appHtml);
 
 // TYPESCRIPT
 
@@ -258,7 +282,7 @@ function makeBaseSysConfig() {
   });
 
   return {
-    defaultJSExtensions: true,
+    //defaultJSExtensions: true,
     map: map,
     packages: packages
   };  
@@ -267,58 +291,38 @@ function makeBaseSysConfig() {
 function makeDistSysConfig() {
 
   var sysCfg = extend(true, makeBaseSysConfig(), {
-    'transpiler': 'ts',
+    'transpiler': plugintsPkg,
     'typescriptOptions': {
       'tsconfig': true
     },
-    'meta': {
-      'typescript': {
-        'exports': 'ts'
-      }
-    },    
     'map': {
       [vendorPkg]: vendorPkg,
       [appPkg]: appPkg,
       [tsPkg]: vendorPkg,
-      'ts': vendorPkg
+      [plugintsPkg]: vendorPath + plugintsPath + 'plugin.js'
     },
     'packages': {
-      'app':    { 
+      [appPkg]:    { 
         'main': 'main.ts',  
         'defaultExtension': 'ts',
         'meta': {
           '*.ts': {
-            'loader': 'ts'
+            'loader': plugintsPkg
           }
         }
       },
       [tsPkg]: {
         'main': 'typescript.js',
+        'defaultExtension': 'js',
         'meta': {
           'typescript.js': {
             'exports': 'ts'
           } 
         }        
-      },
-      'ts': { 
-        'main': 'plugin.js', 
-        'defaultExtension': 'js' 
       }
     }
   });
 
-// 'reflect': vendorPkg
-// 'reflect': {
-//   'main': 'Reflect.js' 
-// }
-// 'depCache': {
-//   '@angular/core': ['reflect']
-// }
-
-// if using the typescript plugin loader
-  // pkg.app: {
-  // pkg.typescript: {
-  // }   
   return sysCfg;
 }
 
@@ -371,7 +375,7 @@ function ngBundles() {
   })
   .then(function () {
     var sysJsCfg = getDistSysConfig();
-    return fs.writeFile(cfg.dist.config + 'systemjs.config.json', 
+    return fs.writeFile(cfg.dist.sysjs + 'config.json', 
       JSON.stringify(sysJsCfg, null, 2) , 'utf-8');
   })
   ;
@@ -382,17 +386,15 @@ gulp.task('bundles:ng', ngBundles);
 // BUILD
 var build = gulp.parallel(
   style, 
-  appJson, 
-  vendorScript, 
-  appScript,
+  appConfig, 
+  npmScript,
+  sysjsScript,
   configTs, 
   ngApp, 
-  appRoot, 
+  appHtml, 
   ngBundles); 
 
 gulp.task('build', build);
-
-gulp.task('watch:serve', serverWatch);
 
 // SERVER
 
@@ -403,17 +405,21 @@ function server(cb) {
     }, cb);
 }
 
-function serverWatch(cb) {
+function buildWatch() {
   gulp.watch(cfg.src.scss, {delay: cfg.src.delay}, appStyle);
   
-  gulp.watch(cfg.src.root, {delay: cfg.src.delay}, appRoot);
+  gulp.watch(cfg.src.html, {delay: cfg.src.delay}, appHtml);
 
-  gulp.watch(cfg.src.json, {delay: cfg.src.delay}, appJson);
+  gulp.watch(cfg.src.config, {delay: cfg.src.delay}, appConfig);
   
-  gulp.watch(cfg.src.script, {delay: cfg.src.delay}, appScript);
+  gulp.watch(cfg.src.vendor.load, {delay: cfg.src.delay}, sysjsLoad);
 
   gulp.watch(cfg.src.app, {delay: cfg.src.delay}, ngApp);
+}
 
+gulp.task('watch:build', buildWatch);
+
+function distWatch(cb) {
   gulp.watch(cfg.dist.reload, {delay: cfg.dist.delay}, 
       function reload(cb) {
         browserSync.reload();
@@ -421,13 +427,31 @@ function serverWatch(cb) {
     });  
 }
 
+gulp.task('watch:dist', distWatch);
+
 // SERVE
 gulp.task('serve', gulp.series(
     configServe,
     clean,
     build,
     server,
-    serverWatch
+    gulp.parallel(distWatch, buildWatch)
 ));
 
-  
+// DIST
+gulp.task('dist', gulp.series(
+    configServe,
+    server
+));
+
+// DIST
+gulp.task('test', gulp.series(
+    configServe
+    ,clean
+    ,sysjsScript
+    // ,sysjsNpm
+    // ,sysjsTs
+    // , sysjsLoad
+));
+
+  //var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);

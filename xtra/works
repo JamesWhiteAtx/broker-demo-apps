@@ -1,0 +1,98 @@
+{
+  "map": {
+    "rxjs": "node_modules/rxjs",
+    "@angular": "node_modules/@angular",
+    "vendor": "vendor",
+    "app": "app",
+    "plugin":  "vendor/plugin.js",
+    "typescript": "vendor"  
+  },
+  "packages": {
+    "rxjs": {
+      "defaultExtension": "js"
+    },
+    "@angular/common": {
+      "main": "bundles/common.umd.js",
+      "defaultExtension": "js"
+    },
+    "@angular/compiler": {
+      "main": "bundles/compiler.umd.js",
+      "defaultExtension": "js"
+    },
+    "@angular/core": {
+      "main": "bundles/core.umd.js",
+      "defaultExtension": "js"
+    },
+    "@angular/forms": {
+      "main": "bundles/forms.umd.js",
+      "defaultExtension": "js"
+    },
+    "@angular/http": {
+      "main": "bundles/http.umd.js",
+      "defaultExtension": "js"
+    },
+    "@angular/platform-browser": {
+      "main": "bundles/platform-browser.umd.js",
+      "defaultExtension": "js"
+    },
+    "@angular/platform-browser-dynamic": {
+      "main": "bundles/platform-browser-dynamic.umd.js",
+      "defaultExtension": "js"
+    },
+    "app": {
+      "main": "main.ts",
+      "defaultExtension": "ts",
+      "meta": {
+        "*.ts": {
+          "loader": "plugin"
+        }
+      }
+    },
+    "typescript": {
+      "main": "typescript.js",
+      "defaultExtension": "js",
+      "meta": {
+        "typescript.js": {
+          "exports": "ts"
+        } 
+      }        
+    }
+  },
+  "transpiler": "plugin",
+  "typescriptOptions": {
+    "tsconfig": true
+  },
+  "bundles": {
+    "vendor/@angular.bundle": [
+      "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
+      "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
+      "node_modules/@angular/core/bundles/core.umd.js",
+      "node_modules/@angular/common/bundles/common.umd.js",
+      "node_modules/@angular/compiler/bundles/compiler.umd.js",
+      "node_modules/@angular/http/bundles/http.umd.js",
+      "node_modules/@angular/forms/bundles/forms.umd.js"
+    ],
+    "vendor/rxjs.bundle": [
+      "node_modules/rxjs/operator/toPromise.js",
+      "node_modules/rxjs/util/root.js",
+      "node_modules/rxjs/observable/PromiseObservable.js",
+      "node_modules/rxjs/Observable.js",
+      "node_modules/rxjs/util/toSubscriber.js",
+      "node_modules/rxjs/symbol/rxSubscriber.js",
+      "node_modules/rxjs/Subscriber.js",
+      "node_modules/rxjs/Observer.js",
+      "node_modules/rxjs/Subscription.js",
+      "node_modules/rxjs/util/UnsubscriptionError.js",
+      "node_modules/rxjs/util/errorObject.js",
+      "node_modules/rxjs/util/tryCatch.js",
+      "node_modules/rxjs/util/isFunction.js",
+      "node_modules/rxjs/util/isObject.js",
+      "node_modules/rxjs/util/isArray.js",
+      "node_modules/rxjs/symbol/observable.js",
+      "node_modules/rxjs/Subject.js",
+      "node_modules/rxjs/util/ObjectUnsubscribedError.js",
+      "node_modules/rxjs/util/throwError.js",
+      "node_modules/rxjs/SubjectSubscription.js"
+    ]
+  }
+}
