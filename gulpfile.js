@@ -24,14 +24,15 @@ const plugintsPkg = "plugints";
 const plugintsPath = sysjsPath + plugintsPkg + "/";
 const configPath = 'config/';
 
-const serveDist = 'dist/';
+const defaultDist = 'dist/';
 //const docsDist = '/Users/jameswhite/Source/deploy/ib2/docs/demo/';
 
 var distPath = '';
 var cfg = {}
 
 function configure(dist) {
-  distPath = dist;
+  distPath = path.normalize(dist + '/');
+console.log('distPath is', distPath);
   cfg = {
     prod: false,
     src: {
@@ -96,27 +97,18 @@ function configure(dist) {
   };
 }
 
+// default to configuring for local development server
+configDist();
+
 function getArg(key) {
   var index = process.argv.indexOf(key);
   var next = process.argv[index + 1];
   return (index < 0) ? null : (!next || next[0] === "-") ? true : next;
 }
-// default to configuring for local development server
-configServe();
 
-function configServe(cb) {
-  
+function configDist(cb) {
   var dist = getArg("--dist");
-  console.log('dist is', dist);
-  
-  configure(serveDist);
-  if (cb) {
-    cb();
-  }
-}
-
-function configDocs(cb) {
-	configure(docsDist);
+  configure(dist || defaultDist);
   if (cb) {
     cb();
   }
@@ -436,12 +428,12 @@ gulp.task('build', build);
 function server(cb) {
     browserSync.init({
       "injectChanges": false,
-      "files": ["dist/**/*.{html,htm,css,js,ts,json}"],
+      "files": [distPath + "**/*.{html,htm,css,js,ts,json}"],
       "watchOptions": {
         "ignored": ["node_modules", "plugin-typescript"]  
       },
       "server": {
-        "baseDir": "dist" 
+        "baseDir": distPath
       },
       notify: false
     }, cb);
@@ -473,7 +465,7 @@ gulp.task('watch:build', buildWatch);
 
 // SERVE
 gulp.task('serve', gulp.series(
-    configServe,
+    configDist,
     clean,
     build,
     server,
@@ -482,11 +474,11 @@ gulp.task('serve', gulp.series(
 
 // DIST
 gulp.task('dist', gulp.series(
-    configServe,
+    configDist,
     server
 ));
 
-gulp.task('test', function(cb) {
+gulp.task('bubdles', function(cb) {
   var sysCfg = {
     paths: { 'xxx/*': 'node_modules/*' },
     map: { rxjs: 'node_modules/rxjs' },
@@ -514,6 +506,10 @@ gulp.task('test', function(cb) {
   })
   ;
 
+});
+
+gulp.task('bubdles', function(cb) {
+  cb();
 });
 
   //var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);`
