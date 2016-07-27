@@ -61,8 +61,7 @@ console.log('distPath is', distPath);
           npmPath + 'typescript/lib/typescript.js'
         ],
         ts: {
-          npm: npmPath + 'typescript/lib/typescript.js',
-          cfg: sourcePath + vendorPath + tsPath + 'tsconfig.json'
+          npm: npmPath + 'typescript/lib/typescript.js'
         },        
         sysjs: {
           npm: npmPath + 'systemjs/dist/system.src.js',
@@ -263,23 +262,13 @@ gulp.task('html:app', appHtml);
 
 // TYPESCRIPT
 
-function tsNpm() {
+function tsScript() {
   return gulp
     .src(cfg.src.vendor.ts.npm)
     .pipe(gulp.dest(cfg.dist.ts));
 }
 
-gulp.task('script:ts:npm', tsNpm);
-
-function tsConfig() {
-  return gulp
-    .src(cfg.src.vendor.ts.cfg)
-    .pipe(gulp.dest(cfg.dist.ts));
-}
-
-gulp.task('config:ts', tsConfig);
-
-var tsScript = gulp.parallel(tsNpm, tsConfig);
+gulp.task('script:ts:npm', tsScript);
 
 
 // BUNDELS
@@ -359,7 +348,7 @@ function makeDistSysJsCfg() {
     'packages': packages,
     'transpiler': plugintsPkg,
     'typescriptOptions': {
-      'tsconfig': vendorPath + tsPath + 'tsconfig.json'
+      'tsconfig': appPath + 'tsconfig.json'
     }    
   };
 
