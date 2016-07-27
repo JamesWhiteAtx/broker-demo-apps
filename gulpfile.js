@@ -481,7 +481,7 @@ gulp.task('dist', gulp.series(
     server
 ));
 
-gulp.task('bubdles', function(cb) {
+gulp.task('bundles', function(cb) {
   var sysCfg = {
     paths: { 'xxx/*': 'node_modules/*' },
     map: { rxjs: 'node_modules/rxjs' },
@@ -511,8 +511,55 @@ gulp.task('bubdles', function(cb) {
 
 });
 
-gulp.task('bubdles', function(cb) {
-  cb();
-});
+function serveUbid(cb) {
+    browserSync.init({
+      "injectChanges": false,
+      "files": ["./ubid/**/*.{html,htm,css,js,ts,json}"],
+      "watchOptions": {
+        "ignored": ["node_modules", "plugin-typescript"]  
+      },
+      "server": {
+        "baseDir": "./ubid"
+      },
+      notify: false
+    }, cb);
+}
 
-  //var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);`
+gulp.task('ubid', serveUbid);
+
+function test(cb) {
+  var sysCfg = {
+    map: {
+      'ts': 'node_modules/plugin-typescript/lib',
+      'typescript': 'node_modules/typescript/lib/typescript.js'
+    },
+    packages: {
+      ts: {
+        "main": "plugin.js",
+        "defaultExtension": "js"
+      }
+    },
+	  transpiler: 'ts',
+    typescriptOptions: {
+      tsconfig: "ubid/tsconfig.json"
+    },
+    meta: {
+      'typescript': {
+        "exports": "ts"
+      }
+    }
+  };
+
+  var builder = new Builder();
+  builder.config(sysCfg);
+
+  return builder.buildStatic('ubid/callback.ts', 'ubid/bundle.js')
+  .then(function(output) {
+    console.log(output.modules);
+    return output.modules;
+  })
+  ;    
+}
+
+gulp.task('test', test);
+
