@@ -1,50 +1,31 @@
 {
   "map": {
-    "rxjs": "node_modules/rxjs",
-    "@angular": "node_modules/@angular",
-    "vendor": "vendor",
     "app": "app",
-    "plugin":  "vendor/plugin.js",
-    "typescript": "vendor"  
+    "typescript": "vendor/typescript",
+    "plugints": "vendor/systemjs/plugints",
+    "rxjs": "vendor/rxjs",
+    "@angular/common": "vendor/@angular/common.umd.js",
+    "@angular/compiler": "vendor/@angular/compiler.umd.js",
+    "@angular/core": "vendor/@angular/core.umd.js",
+    "@angular/forms": "vendor/@angular/forms.umd.js",
+    "@angular/http": "vendor/@angular/http.umd.js",
+    "@angular/platform-browser": "vendor/@angular/platform-browser.umd.js",
+    "@angular/platform-browser-dynamic": "vendor/@angular/platform-browser-dynamic.umd.js"
   },
   "packages": {
     "rxjs": {
-      "defaultExtension": "js"
+      "defaultExtension": "js"      
     },
-    "@angular/common": {
-      "main": "bundles/common.umd.js",
-      "defaultExtension": "js"
-    },
-    "@angular/compiler": {
-      "main": "bundles/compiler.umd.js",
-      "defaultExtension": "js"
-    },
-    "@angular/core": {
-      "main": "bundles/core.umd.js",
-      "defaultExtension": "js"
-    },
-    "@angular/forms": {
-      "main": "bundles/forms.umd.js",
-      "defaultExtension": "js"
-    },
-    "@angular/http": {
-      "main": "bundles/http.umd.js",
-      "defaultExtension": "js"
-    },
-    "@angular/platform-browser": {
-      "main": "bundles/platform-browser.umd.js",
-      "defaultExtension": "js"
-    },
-    "@angular/platform-browser-dynamic": {
-      "main": "bundles/platform-browser-dynamic.umd.js",
-      "defaultExtension": "js"
+    "plugints": {
+      "main": "plugin.js",
+      "defaultExtension": "js"      
     },
     "app": {
       "main": "main.ts",
       "defaultExtension": "ts",
       "meta": {
         "*.ts": {
-          "loader": "plugin"
+          "loader": "plugints"
         }
       }
     },
@@ -54,45 +35,36 @@
       "meta": {
         "typescript.js": {
           "exports": "ts"
-        } 
-      }        
+        }
+      }
     }
   },
-  "transpiler": "plugin",
+  "transpiler": "plugints",
   "typescriptOptions": {
     "tsconfig": true
   },
   "bundles": {
-    "vendor/@angular.bundle": [
-      "node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js",
-      "node_modules/@angular/platform-browser/bundles/platform-browser.umd.js",
-      "node_modules/@angular/core/bundles/core.umd.js",
-      "node_modules/@angular/common/bundles/common.umd.js",
-      "node_modules/@angular/compiler/bundles/compiler.umd.js",
-      "node_modules/@angular/http/bundles/http.umd.js",
-      "node_modules/@angular/forms/bundles/forms.umd.js"
-    ],
-    "vendor/rxjs.bundle": [
-      "node_modules/rxjs/operator/toPromise.js",
-      "node_modules/rxjs/util/root.js",
-      "node_modules/rxjs/observable/PromiseObservable.js",
-      "node_modules/rxjs/Observable.js",
-      "node_modules/rxjs/util/toSubscriber.js",
-      "node_modules/rxjs/symbol/rxSubscriber.js",
-      "node_modules/rxjs/Subscriber.js",
-      "node_modules/rxjs/Observer.js",
-      "node_modules/rxjs/Subscription.js",
-      "node_modules/rxjs/util/UnsubscriptionError.js",
-      "node_modules/rxjs/util/errorObject.js",
-      "node_modules/rxjs/util/tryCatch.js",
-      "node_modules/rxjs/util/isFunction.js",
-      "node_modules/rxjs/util/isObject.js",
-      "node_modules/rxjs/util/isArray.js",
-      "node_modules/rxjs/symbol/observable.js",
-      "node_modules/rxjs/Subject.js",
-      "node_modules/rxjs/util/ObjectUnsubscribedError.js",
-      "node_modules/rxjs/util/throwError.js",
-      "node_modules/rxjs/SubjectSubscription.js"
+    "vendor/rxjs.bundle.js": [
+      "vendor/rxjs/operator/toPromise.js",
+      "vendor/rxjs/util/root.js",
+      "vendor/rxjs/observable/PromiseObservable.js",
+      "vendor/rxjs/Observable.js",
+      "vendor/rxjs/util/toSubscriber.js",
+      "vendor/rxjs/symbol/rxSubscriber.js",
+      "vendor/rxjs/Subscriber.js",
+      "vendor/rxjs/Observer.js",
+      "vendor/rxjs/Subscription.js",
+      "vendor/rxjs/util/UnsubscriptionError.js",
+      "vendor/rxjs/util/errorObject.js",
+      "vendor/rxjs/util/tryCatch.js",
+      "vendor/rxjs/util/isFunction.js",
+      "vendor/rxjs/util/isObject.js",
+      "vendor/rxjs/util/isArray.js",
+      "vendor/rxjs/symbol/observable.js",
+      "vendor/rxjs/Subject.js",
+      "vendor/rxjs/util/ObjectUnsubscribedError.js",
+      "vendor/rxjs/util/throwError.js",
+      "vendor/rxjs/SubjectSubscription.js"
     ]
   }
 }

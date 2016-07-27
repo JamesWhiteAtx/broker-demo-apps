@@ -13,15 +13,17 @@ const appPkg = 'app';
 const appPath = appPkg + '/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
+const bootPath = 'bootstrap/';
 const ngPkg = '@angular';
 const ngPath = ngPkg + '/';
 const rxjsPkg = 'rxjs';
 const stylePath = 'style/';
 const tsPkg = 'typescript';
+const tsPath = tsPkg + "/";
 const sysjsPkg = "systemjs";
 const sysjsPath = sysjsPkg + "/";
 const plugintsPkg = "plugints";
-const plugintsPath = sysjsPath + plugintsPkg + "/";
+const plugintsPath = plugintsPkg + "/";
 const configPath = 'config/';
 
 const defaultDist = 'dist/';
@@ -43,7 +45,7 @@ console.log('distPath is', distPath);
       img: sourcePath + 'img/**/*.*',
       config: sourcePath + 'config/**/*.*',
       vendor: {
-        bootstrap: sourcePath + vendorPath + 'bootbase.scss',
+        bootstrap: sourcePath + vendorPath + bootPath + 'bootbase.scss',
         awesome: npmPath + 'font-awesome/scss/font-awesome.scss',
         fonts: [
           npmPath + 'font-awesome/fonts/*.*',
@@ -52,15 +54,20 @@ console.log('distPath is', distPath);
         npm: [
           npmPath + 'jquery/dist/jquery.js',
           npmPath + 'bootstrap-sass/assets/javascripts/bootstrap.js',
-          npmPath + 'typescript/lib/typescript.js',
           npmPath + 'reflect-metadata/Reflect.js',
           npmPath + 'zone.js/dist/zone.js',
-          npmPath + 'core-js/client/shim.min.js'
+          npmPath + 'core-js/client/shim.min.js',
+
+          npmPath + 'typescript/lib/typescript.js'
         ],
+        ts: {
+          npm: npmPath + 'typescript/lib/typescript.js',
+          cfg: sourcePath + vendorPath + tsPath + 'tsconfig.json'
+        },        
         sysjs: {
           npm: npmPath + 'systemjs/dist/system.src.js',
           plugints: npmPath + 'plugin-typescript/lib/*.js',
-          load: sourcePath + sysjsPath + '*.js'
+          load: sourcePath + vendorPath + sysjsPath + '*.js'
         }, 
         ng: {
           root: npmPath + ngPath,
@@ -86,8 +93,9 @@ console.log('distPath is', distPath);
       config: distPath + configPath,
       vendor: distPath + vendorPath,
       ng: distPath + vendorPath + ngPath,
+      ts: distPath + vendorPath + tsPath,
       sysjs: distPath + vendorPath + sysjsPath,
-      plugints: distPath + vendorPath + plugintsPath, 
+      plugints: distPath + vendorPath + sysjsPath + plugintsPath, 
       styles: {
         app: 'app.css',
         vendor: 'vendor.css'
@@ -190,11 +198,9 @@ gulp.task('app:ng', ngApp);
 // NPM SCRIPTS
 
 function npmScript() {
-    return gulp
-        .src(cfg.src.vendor.npm)
-        //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
-        //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
-        .pipe(gulp.dest(cfg.dist.vendor));
+  return gulp
+    .src(cfg.src.vendor.npm)
+    .pipe(gulp.dest(cfg.dist.vendor));
 }
 
 gulp.task('script:npm', npmScript);
@@ -205,13 +211,8 @@ function ngScript() {
   var ngPkgs = cfg.src.vendor.ng.pkgs.map(function(pkgName) {
     return cfg.src.vendor.ng.root + pkgName + '/bundles/' + pkgName + '.umd.js';
   });
- //var ngPkgs = makeNgPkgNames();
- //console.log(ngPkgs);
- //var allNgExpr = ngPkgs.join(' + ');
   return gulp
     .src(ngPkgs)
-    //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
-    //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
     .pipe(gulp.dest(cfg.dist.ng)); 
 }
 
@@ -222,20 +223,16 @@ gulp.task('script:ng', ngScript);
 function sysjsNpm() {
   return gulp
     .src(cfg.src.vendor.sysjs.npm)
-    //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
-    //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
     .pipe(gulp.dest(cfg.dist.sysjs));
 }
 
 gulp.task('script:sysjs:npm', sysjsNpm);
 
-// TYPESCRIPT PLUGIN SCRIPT
+// SYSTEMJS TYPESCRIPT PLUGIN SCRIPT
 
 function sysjsTs() {
   return gulp
     .src(cfg.src.vendor.sysjs.plugints)
-    //.pipe(ifProd($.concat(cfg.dist.scripts.vendor)))
-    //.pipe(ifProd($.uglify({ compress: { sequences: false, join_vars: false } })))
     .pipe(gulp.dest(cfg.dist.plugints));
 }
 
@@ -266,13 +263,23 @@ gulp.task('html:app', appHtml);
 
 // TYPESCRIPT
 
-function configTs() {
-	return gulp
-        .src('tsconfig.json')
-        .pipe(gulp.dest(distPath));
+function tsNpm() {
+  return gulp
+    .src(cfg.src.vendor.ts.npm)
+    .pipe(gulp.dest(cfg.dist.ts));
 }
 
-gulp.task('ts:config', configTs);
+gulp.task('script:ts:npm', tsNpm);
+
+function tsConfig() {
+  return gulp
+    .src(cfg.src.vendor.ts.cfg)
+    .pipe(gulp.dest(cfg.dist.ts));
+}
+
+gulp.task('config:ts', tsConfig);
+
+var tsScript = gulp.parallel(tsNpm, tsConfig);
 
 
 // BUNDELS
@@ -310,8 +317,8 @@ function makeBundleSysJsCfg() {
 function makeDistSysJsCfg() {
   var map = {
     [appPkg]: appPkg,
-    [tsPkg]: vendorPkg,
-    [plugintsPkg]: vendorPath + plugintsPath + 'plugin.js',
+    [tsPkg]: vendorPath + tsPkg,
+    [plugintsPkg]: vendorPath + sysjsPath + plugintsPkg,
     [rxjsPkg]: vendorPath + rxjsPkg
   };
 
@@ -337,6 +344,13 @@ function makeDistSysJsCfg() {
           'exports': 'ts'
         } 
       }        
+    },
+    [plugintsPkg]: {
+      'main': 'plugin.js',
+      'defaultExtension': 'js'      
+    },
+      [rxjsPkg]: {
+      'defaultExtension': 'js'      
     }
   };
 
@@ -345,7 +359,7 @@ function makeDistSysJsCfg() {
     'packages': packages,
     'transpiler': plugintsPkg,
     'typescriptOptions': {
-      'tsconfig': true
+      'tsconfig': vendorPath + tsPath + 'tsconfig.json'
     }    
   };
 
@@ -360,8 +374,8 @@ function getDistSysJsCfg() {
 }
 
 function writePkgBundle(builder, pkg, trace) {
-  var bundleName = vendorPath + pkg + '.bundle';
-  var distFile = distPath + bundleName + '.js';
+  var bundleName = vendorPath + pkg + '.bundle.js';
+  var distFile = distPath + bundleName;
 
   return builder.bundle(trace, distFile)
   .then(function(output) {
@@ -411,14 +425,14 @@ gulp.task('bundles:ng', ngBundles);
 
 // BUILD
 var build = gulp.parallel(
-  style, 
-  appConfig, 
   npmScript,
   ngScript,
   sysjsScript,
-  configTs, 
-  ngApp, 
+  tsScript,
   appHtml, 
+  style, 
+  ngApp, 
+  appConfig, 
   ngBundles); 
 
 gulp.task('build', build);

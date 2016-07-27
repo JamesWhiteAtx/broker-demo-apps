@@ -29,6 +29,9 @@ build/Release
 # dist
 dist
 
+# extra stuff
+xtra
+
 # Dependency directories
 node_modules
 jspm_packages
