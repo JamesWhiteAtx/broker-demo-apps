@@ -1,10 +1,17 @@
 {
-  "name": "demo1",
+  "private": true,
+  "name": "broker-demo",
   "version": "1.0.0",
+  "description": "Demonstration of Broker.",
+  "homepage": "https://github.com/UnboundID/broker-demo#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UnboundID/broker-demo.git"
+  },
+  "license": "ISC",
   "scripts": {
     "lite": "lite-server"
   },
-  "license": "ISC",
   "dependencies": {
     "@angular/common": "2.0.0-rc.4",
     "@angular/compiler": "2.0.0-rc.4",
@@ -28,12 +35,14 @@
     "del": "^2.2.1",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-concat": "^2.6.0",
+    "gulp-header": "^1.8.7",
     "gulp-load-plugins": "^1.2.4",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.3.2",
     "gulp-util": "^3.0.7",
     "lite-server": "^2.2.2",
     "merge2": "^1.0.2",
-    "systemjs-builder": "^0.15.23"
+    "systemjs-builder": "^0.15.23",
+    "through2": "^2.0.1"
   }
 }

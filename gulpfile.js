@@ -5,6 +5,8 @@ const fs = require('fs');
 const gulp = require('gulp');
 const merge2 = require('merge2');
 const path = require('path');
+const pkg = require('./package.json');
+const through = require('through2');
 const $ = require('gulp-load-plugins')();
 
 const npmPath = 'node_modules/';
@@ -36,7 +38,7 @@ var cfg = {}
 
 function configure(dist) {
   distPath = path.normalize(dist + '/');
-console.log('distPath is', distPath);
+
   cfg = {
     prod: false,
     src: {
@@ -169,6 +171,7 @@ function appStyle() {
         .src(cfg.src.scss)
         .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
         .pipe($.concat(cfg.dist.styles.app))
+        .pipe(typeHeader())
         .pipe(gulp.dest(cfg.dist.style));
 }
 
@@ -189,12 +192,48 @@ function appConfig() {
 
 gulp.task('config:app', appConfig);
 
+cfg.copyMsg = 
+` * Copyright (c) ${new Date().getFullYear()} UnboundID Corp.
+ * All Rights Reserved. 
+ * ${pkg.name} - ${pkg.description}
+ * @version ${pkg.version}
+ * @link ${pkg.homepage}
+ * @license ${pkg.license}`;
+
+function typeHeader() {
+
+  function tansformStream(file, enc, cb) {
+    if (file.extname.match(/(.*?)\.(js|ts|html|htm|css|scss)$/igm)) {
+  
+      if (file.extname.match(/(.*?)\.(js|ts)$/igm)) {
+        header = '/**\n' + cfg.copyMsg + '\n */\n\n';
+      } else  if (file.extname.match(/(.*?)\.(html|htm)$/igm)) {
+        header = '<!--\n' + cfg.copyMsg + '\n-->\n\n';
+      } else  if (file.extname.match(/(.*?)\.(css|scss)$/igm)) {
+        header = '/*!\n' + cfg.copyMsg + '\n */\n\n';        
+      }
+
+      var headerStream = $.header(header, {pkg: pkg} ); 
+      headerStream.once('data', function(newFile) {
+          file.contents = newFile.contents;
+      })
+
+      headerStream.write(file);
+    }
+    this.push(file);
+    return cb();
+  }
+
+  return through.obj(tansformStream);
+ }
+
 // ANGULAR APP
 function ngApp() {
   return gulp
     .src(cfg.src.app)
+    .pipe(typeHeader())
     .pipe(gulp.dest(cfg.dist.app));
-}
+  }
 
 gulp.task('app:ng', ngApp);
 
