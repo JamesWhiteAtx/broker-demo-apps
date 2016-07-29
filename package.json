@@ -31,6 +31,7 @@
     "gulp-load-plugins": "^1.2.4",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^2.3.2",
+    "gulp-util": "^3.0.7",
     "lite-server": "^2.2.2",
     "merge2": "^1.0.2",
     "systemjs-builder": "^0.15.23"

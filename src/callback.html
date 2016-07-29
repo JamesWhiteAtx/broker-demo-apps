@@ -4,15 +4,13 @@
   <title>UnboundID Data Broker Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="dist/img/unboundid-u-transparent-16x16.ico" rel="shortcut icon">
+
+  <script src="vendor/ubid/callback.js"></script>
+
 </head>
 <body style="background-color: #dbdbdb;">
   <script>
-    var l = location;
-    var url = l.origin +
-        l.pathname.substring(0, l.pathname.lastIndexOf('/') + 1) +
-        '?csearch=' + encodeURIComponent(btoa(l.search || '')) +
-        '&chash=' + encodeURIComponent(btoa(l.hash || ''));
-    l.replace(url);
+    ubid.redirect(location);
   </script>
 </body>
 </html>

@@ -13,6 +13,7 @@ const appPkg = 'app';
 const appPath = appPkg + '/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
+const ubidPath = 'ubid/';
 const bootPath = 'bootstrap/';
 const ngPkg = '@angular';
 const ngPath = ngPkg + '/';
@@ -29,6 +30,7 @@ const configPath = 'config/';
 const defaultDist = 'dist/';
 //const docsDist = '/Users/jameswhite/Source/deploy/ib2/docs/demo/';
 
+var proxyTarget;
 var distPath = '';
 var cfg = {}
 
@@ -45,6 +47,7 @@ console.log('distPath is', distPath);
       img: sourcePath + 'img/**/*.*',
       config: sourcePath + 'config/**/*.*',
       vendor: {
+        ubid: sourcePath + vendorPath + ubidPath + '**/*.*',
         bootstrap: sourcePath + vendorPath + bootPath + 'bootbase.scss',
         awesome: npmPath + 'font-awesome/scss/font-awesome.scss',
         fonts: [
@@ -91,6 +94,7 @@ console.log('distPath is', distPath);
       style: distPath + stylePath,
       config: distPath + configPath,
       vendor: distPath + vendorPath,
+      ubid: distPath + vendorPath + ubidPath,
       ng: distPath + vendorPath + ngPath,
       ts: distPath + vendorPath + tsPath,
       sysjs: distPath + vendorPath + sysjsPath,
@@ -270,6 +274,15 @@ function tsScript() {
 
 gulp.task('script:ts:npm', tsScript);
 
+// UBID
+
+function ubidSript() {
+  return gulp
+    .src(cfg.src.vendor.ubid)
+    .pipe(gulp.dest(cfg.dist.ubid));
+}
+
+gulp.task('script:ubid', ubidSript);
 
 // BUNDELS
 
@@ -418,6 +431,7 @@ var build = gulp.parallel(
   ngScript,
   sysjsScript,
   tsScript,
+  ubidSript,
   appHtml, 
   style, 
   ngApp, 
@@ -468,17 +482,10 @@ gulp.task('watch:build', buildWatch);
 
 // SERVE
 gulp.task('serve', gulp.series(
-    configDist,
     clean,
     build,
     server,
     buildWatch
-));
-
-// DIST
-gulp.task('dist', gulp.series(
-    configDist,
-    server
 ));
 
 gulp.task('bundles', function(cb) {
@@ -511,21 +518,39 @@ gulp.task('bundles', function(cb) {
 
 });
 
-function serveUbid(cb) {
+function serveProxy(cb) {
+    proxyTarget = getArg("--proxy");
+    if (!proxyTarget) {
+      throw new $.util.PluginError({
+        plugin: 'Server Proxy',
+        message: 'No proxy target specified.'
+      });    
+    }
+    
     browserSync.init({
       "injectChanges": false,
-      "files": ["./ubid/**/*.{html,htm,css,js,ts,json}"],
-      "watchOptions": {
-        "ignored": ["node_modules", "plugin-typescript"]  
-      },
-      "server": {
-        "baseDir": "./ubid"
+      "files": [distPath + "**/*.{html,htm,css,js,ts,json}"],
+      proxy: {
+          target: proxyTarget
       },
       notify: false
     }, cb);
 }
 
-gulp.task('ubid', serveUbid);
+gulp.task('serve:proxy', serveProxy);
+
+// PROXY
+gulp.task('proxy', gulp.series(
+    clean,
+    build,
+    serveProxy,
+    buildWatch,
+    function settings(cb) {
+      $.util.log($.util.colors.magenta('Dist path:'), $.util.colors.cyan(distPath));
+      $.util.log($.util.colors.magenta('Proxy targeth:'), $.util.colors.cyan(proxyTarget));
+      cb();
+    }
+));
 
 function test(cb) {
   var sysCfg = {
