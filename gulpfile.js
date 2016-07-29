@@ -29,18 +29,30 @@ const plugintsPkg = "plugints";
 const plugintsPath = plugintsPkg + "/";
 const configPath = 'config/';
 
-const defaultDist = 'dist/';
-//const docsDist = '/Users/jameswhite/Source/deploy/ib2/docs/demo/';
-
-var proxyTarget;
-var distPath = '';
 var cfg = {}
 
-function configure(dist) {
-  distPath = path.normalize(dist + '/');
+configDist();
+
+function configDist(cb) {
+  configure(getArg("--dist"),
+    getArg("--proxy"),
+    getArg("--base"));
+ 
+  if (cb) {
+    cb();
+  }
+}
+
+function configure(dist, proxy, base) {
+  var distPath = dist ? path.normalize(dist + '/') : 'dist/';
+  var basePath = base ? path.normalize('/' + base + '/') : '/.';
+  var proxyTarget = proxy ? proxy + basePath : undefined;
+
+//console.log('dist',distPath);console.log('proxyTarget',proxyTarget);console.log('basePath',basePath);
 
   cfg = {
-    prod: false,
+    proxyTarget: proxyTarget,
+    basePath: basePath,
     src: {
       html: sourcePath + '**/*.html',
       app: sourcePath + appPath + '**/*.*',
@@ -88,6 +100,7 @@ function configure(dist) {
       }
     },
     dist: {
+      path: distPath,
       //reload: distPath + '**/*.{html,htm,css,js,ts,json}',
       clean: distPath + '**/*',
       app: distPath + 'app/',
@@ -110,21 +123,11 @@ function configure(dist) {
   };
 }
 
-// default to configuring for local development server
-configDist();
 
 function getArg(key) {
   var index = process.argv.indexOf(key);
   var next = process.argv[index + 1];
   return (index < 0) ? null : (!next || next[0] === "-") ? true : next;
-}
-
-function configDist(cb) {
-  var dist = getArg("--dist");
-  configure(dist || defaultDist);
-  if (cb) {
-    cb();
-  }
 }
 
 // CLEAN
@@ -296,9 +299,12 @@ var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);
 
 // HTML
 function appHtml() {
-	return gulp
-        .src(cfg.src.html)
-        .pipe(gulp.dest(distPath));
+  return gulp
+    .src(cfg.src.html)
+    .pipe($.replace(/<base [^>]*href=\"(.*?)\">/ig, 
+      '<base href="' + cfg.basePath + '">'))
+    .pipe(typeHeader())
+    .pipe(gulp.dest(cfg.dist.path));
 }
 
 gulp.task('html:app', appHtml);
@@ -318,6 +324,7 @@ gulp.task('script:ts:npm', tsScript);
 function ubidSript() {
   return gulp
     .src(cfg.src.vendor.ubid)
+    .pipe(typeHeader())
     .pipe(gulp.dest(cfg.dist.ubid));
 }
 
@@ -416,7 +423,7 @@ function getDistSysJsCfg() {
 
 function writePkgBundle(builder, pkg, trace) {
   var bundleName = vendorPath + pkg + '.bundle.js';
-  var distFile = distPath + bundleName;
+  var distFile = cfg.dist.path + bundleName;
 
   return builder.bundle(trace, distFile)
   .then(function(output) {
@@ -482,17 +489,26 @@ gulp.task('build', build);
 // SERVER
 
 function server(cb) {
-    browserSync.init({
+    var serverCfg = {
       "injectChanges": false,
-      "files": [distPath + "**/*.{html,htm,css,js,ts,json}"],
+      "files": [cfg.dist.path + "**/*.{html,htm,css,js,ts,json}"],
       "watchOptions": {
         "ignored": ["node_modules", "plugin-typescript"]  
       },
-      "server": {
-        "baseDir": distPath
-      },
       notify: false
-    }, cb);
+    };
+
+    if (! cfg.proxyTarget) {
+      serverCfg.server = {
+        "baseDir": cfg.dist.path
+      };
+    } else {
+      serverCfg.proxy = {
+        target: cfg.proxyTarget
+      };
+    }
+
+    browserSync.init(serverCfg, cb);
 }
 
 function buildWatch() {
@@ -524,9 +540,16 @@ gulp.task('serve', gulp.series(
     clean,
     build,
     server,
+    settings,
     buildWatch
 ));
 
+function settings(cb) {
+  $.util.log($.util.colors.magenta('Dist path:'), $.util.colors.cyan(cfg.dist.path));
+  $.util.log($.util.colors.magenta('Proxy target:'), $.util.colors.cyan(cfg.proxyTarget));
+  $.util.log($.util.colors.magenta('base path:'), $.util.colors.cyan(cfg.basePath));
+  cb();
+}
 gulp.task('bundles', function(cb) {
   var sysCfg = {
     paths: { 'xxx/*': 'node_modules/*' },
@@ -557,73 +580,11 @@ gulp.task('bundles', function(cb) {
 
 });
 
-function serveProxy(cb) {
-    proxyTarget = getArg("--proxy");
-    if (!proxyTarget) {
-      throw new $.util.PluginError({
-        plugin: 'Server Proxy',
-        message: 'No proxy target specified.'
-      });    
-    }
-    
-    browserSync.init({
-      "injectChanges": false,
-      "files": [distPath + "**/*.{html,htm,css,js,ts,json}"],
-      proxy: {
-          target: proxyTarget
-      },
-      notify: false
-    }, cb);
-}
-
-gulp.task('serve:proxy', serveProxy);
-
-// PROXY
-gulp.task('proxy', gulp.series(
-    clean,
-    build,
-    serveProxy,
-    buildWatch,
-    function settings(cb) {
-      $.util.log($.util.colors.magenta('Dist path:'), $.util.colors.cyan(distPath));
-      $.util.log($.util.colors.magenta('Proxy targeth:'), $.util.colors.cyan(proxyTarget));
-      cb();
-    }
-));
-
-function test(cb) {
-  var sysCfg = {
-    map: {
-      'ts': 'node_modules/plugin-typescript/lib',
-      'typescript': 'node_modules/typescript/lib/typescript.js'
-    },
-    packages: {
-      ts: {
-        "main": "plugin.js",
-        "defaultExtension": "js"
-      }
-    },
-	  transpiler: 'ts',
-    typescriptOptions: {
-      tsconfig: "ubid/tsconfig.json"
-    },
-    meta: {
-      'typescript': {
-        "exports": "ts"
-      }
-    }
-  };
-
-  var builder = new Builder();
-  builder.config(sysCfg);
-
-  return builder.buildStatic('ubid/callback.ts', 'ubid/bundle.js')
-  .then(function(output) {
-    console.log(output.modules);
-    return output.modules;
-  })
-  ;    
+function
+ test(cb) {
+   cb();
 }
 
 gulp.task('test', test);
 
+    // /Users/jameswhite/Source/deploy/ib2/docs/demo/';
