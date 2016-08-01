@@ -10,8 +10,8 @@ const through = require('through2');
 const $ = require('gulp-load-plugins')();
 
 const npmPath = 'node_modules/';
-const sourcePath = 'src/';
 const appPkg = 'app';
+const sourcePath = 'src/';
 const appPath = appPkg + '/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
@@ -73,9 +73,8 @@ function configure(dist, proxy, base) {
           npmPath + 'bootstrap-sass/assets/javascripts/bootstrap.js',
           npmPath + 'reflect-metadata/Reflect.js',
           npmPath + 'zone.js/dist/zone.js',
-          npmPath + 'core-js/client/shim.min.js',
-
-          npmPath + 'typescript/lib/typescript.js'
+          npmPath + 'core-js/client/shim.min.js'
+          // ?? npmPath + 'typescript/lib/typescript.js'
         ],
         ts: {
           npm: npmPath + 'typescript/lib/typescript.js'
@@ -343,6 +342,7 @@ function makeBundleSysJsCfg() {
     [rxjsPkg]: npmPath + rxjsPkg,
     [ngPkg]: npmPath + ngPkg
   };
+
   var packages = {
     rxjs: {
       defaultExtension: 'js' 
@@ -352,6 +352,39 @@ function makeBundleSysJsCfg() {
   cfg.src.vendor.ng.pkgs.forEach(function(pkgName) {
     packages[ngPath + pkgName] = { main: 'bundles/' + pkgName + '.umd.js', defaultExtension: 'js' };
   });
+
+////////////////
+
+  map.app = sourcePath + appPkg;
+  map[tsPkg] = npmPath + 'typescript/lib';
+	map[plugintsPkg] = npmPath + 'plugin-typescript/lib';
+
+  packages[appPkg] = {
+      "main": "main.ts",
+      "defaultExtension": "ts",
+      "meta": {
+        "*.ts": {
+          "loader": "plugints"
+        }
+      }
+    };
+
+	packages[tsPkg] = {
+      "main": "typescript.js",
+      "defaultExtension": "js",
+      "meta": {
+        "typescript.js": {
+          "exports": "ts"
+        }
+      }
+    };
+
+	packages[plugintsPkg] = {
+      "main": "plugin.js",
+      "defaultExtension": "js"
+    };
+
+////////////////
 
   var sysCfg = {
     'paths': { [vendorPath + '*']: npmPath + '*' },
@@ -434,32 +467,24 @@ function writePkgBundle(builder, pkg, trace) {
   })
 }
 
-function ngBundles() {
+function libBundles() {
   var sysCfg = makeBundleSysJsCfg();
   var builder = new Builder();
   builder.config(sysCfg);
-  
-  var ngPkgs = makeNgPkgNames();
-  var allNgExpr = ngPkgs.join(' + ');
-  var justNgExpr = '(' + allNgExpr + ') - ['+rxjsPkg+'/**/*]';
 
-  var allNgTrace;
-  
-  return builder.trace(allNgExpr)
+  var ngPkgs = makeNgPkgNames();
+  var allPkgs = ngPkgs.concat(appPkg);
+  var allPkgExpr = allPkgs.join(' + ');
+
+  var noNgExpr = ngPkgs.map(function (pkg) {
+    return '['+pkg+']';
+  }).join(' - ');
+
+  var noAppNgExpr = noNgExpr + ' - [app/**/*]';
+
+  return builder.trace('(' + allPkgExpr + ') - ' + noAppNgExpr)
   .then(function (trace) {
-    allNgTrace = trace;
-    return builder.trace(justNgExpr);
-  })
-  // .then(function (trace) {
-  //   justNgTrace = trace;
-  //   return writePkgBundle(builder, ngPkg, justNgTrace);
-  // })
-  .then(function (justNgTrace) {
-    return builder.subtractTrees(allNgTrace, justNgTrace);
-  })
-  .then(function (trace) {
-    ngRxTrace = trace;
-    return writePkgBundle(builder, rxjsPkg, ngRxTrace);
+    return writePkgBundle(builder, 'lib', trace);
   })
   .then(function () {
     var sysJsCfg = getDistSysJsCfg();
@@ -469,7 +494,7 @@ function ngBundles() {
   ;
 }
 
-gulp.task('bundles:ng', ngBundles);
+gulp.task('bundles:lib', libBundles);
 
 // BUILD
 var build = gulp.parallel(
@@ -482,7 +507,7 @@ var build = gulp.parallel(
   style, 
   ngApp, 
   appConfig, 
-  ngBundles); 
+  libBundles); 
 
 gulp.task('build', build);
 
@@ -550,33 +575,79 @@ function settings(cb) {
   $.util.log($.util.colors.magenta('base path:'), $.util.colors.cyan(cfg.basePath));
   cb();
 }
+
 gulp.task('bundles', function(cb) {
-  var sysCfg = {
-    paths: { 'xxx/*': 'node_modules/*' },
-    map: { rxjs: 'node_modules/rxjs' },
-    packages: { rxjs: { defaultExtension: 'js' } },
+ 
+  function getSubTrace(builder, allExpr, subExpr) {
+    var noSubExpr, allTrace;
 
-    defaultJSExtensions: true
+    noSubExpr = '(' + allExpr + ') - ['+subExpr+'/**/*]';
+    
+    return builder.trace(allExpr)
+    .then(function (trace) {
+      allTrace = trace;
+    })
+    .then(function (trace) {
+      return builder.trace(noSubExpr);
+    })
+    .then(function (noSubTrace) {
+      return builder.subtractTrees(allTrace, noSubTrace);
+    })
   }
-  cfg.src.vendor.ng.pkgs.forEach(function(pkgName) {
-    sysCfg.map[ngPath + pkgName] = npmPath + ngPath + pkgName + '/index.js';
-  });  
-
+  
+  var sysCfg = makeBundleSysJsCfg();
   var builder = new Builder();
   builder.config(sysCfg);
-
-  var ngPkgs = makeNgPkgNames();
-  var allNgExpr = ngPkgs.join(' + ');
-
-  return builder.trace(allNgExpr)
-  .then(function(trace) {
-    return builder.bundle(trace);
+  
+  getSubTrace(builder, appPkg, rxjsPkg)
+  .then(function (trace) {
+    return builder.bundle(trace)
   })
-  .then(function(output) {
-    console.log(output.modules);
-    return output.modules;
+  .then(function(justRxOutput) {
+    console.log('just Rx', justRxOutput.modules.length);
+    console.log('just Rx', justRxOutput.modules);
+    return justRxOutput.modules;
   })
+
+  // .then(function(allAppOutput) {
+  //   console.log('all app', allAppOutput.modules.length);
+  //   console.log('all app', allAppOutput.modules);
+  //   return allAppOutput.modules;
+  // })
+
+  //   return builder.bundle(allTrace)
+
+
   ;
+
+  // builder.trace(appPkg)
+  // .then(function (trace) {
+  //   return builder.bundle(trace)
+  // })
+  // .then(function(output) {
+  //   console.log('all app', output.modules.length);
+  //   return output.modules;
+  // })
+  // ;
+
+  cb();
+  // .then(function (trace) {
+  //   justNgTrace = trace;
+  //   return writePkgBundle(builder, ngPkg, justNgTrace);
+  // })
+  // .then(function (justNgTrace) {
+  //   return builder.subtractTrees(allNgTrace, justNgTrace);
+  // })
+  // .then(function (trace) {
+  //   ngRxTrace = trace;
+  //   return writePkgBundle(builder, rxjsPkg, ngRxTrace);
+  // })
+  // .then(function () {
+  //   var sysJsCfg = getDistSysJsCfg();
+  //   return fs.writeFile(cfg.dist.sysjs + 'config.json', 
+  //     JSON.stringify(sysJsCfg, null, 2) , 'utf-8');
+  // })
+  //;
 
 });
 
