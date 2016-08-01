@@ -9,7 +9,8 @@
                     <span class="icon-bar"></span>
                   </button>
             <a class="navbar-brand" href="#">
-                <img src="img/logo.svg" class="img-responsive" alt="Brand">
+                <img *ngIf="brand" [src]="brand.logo" [alt]="brand.title" 
+                    class="img-responsive" alt="Brand">
             </a>
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse">
@@ -22,9 +23,8 @@
                         <span>userName</span> 
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li  
-                            class="{%if page == 'profile' %}active{% endif %}">
-                            <a href="#">
+                        <li routerLinkActive="active">
+                            <a routerLink="/profile">
                                 <i class="fa fa-wpforms"></i>
                                 Profile
                             </a>

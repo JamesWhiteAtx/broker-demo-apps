@@ -74,7 +74,6 @@ function configure(dist, proxy, base) {
           npmPath + 'reflect-metadata/Reflect.js',
           npmPath + 'zone.js/dist/zone.js',
           npmPath + 'core-js/client/shim.min.js'
-          // ?? npmPath + 'typescript/lib/typescript.js'
         ],
         ts: {
           npm: npmPath + 'typescript/lib/typescript.js'
@@ -86,8 +85,8 @@ function configure(dist, proxy, base) {
         }, 
         ng: {
           root: npmPath + ngPath,
-          pkgs:  [ 'common', 'compiler', 'core', 'forms',
-            'http', 'platform-browser', 'platform-browser-dynamic']
+          pkgs:  [ 'common', 'compiler', 'core', 'forms', 'http', 
+            'platform-browser', 'platform-browser-dynamic', 'router']
         }
       },
       delay: 0,
@@ -576,7 +575,7 @@ function settings(cb) {
   cb();
 }
 
-gulp.task('bundles', function(cb) {
+gulp.task('bundleTest', function(cb) {
  
   function getSubTrace(builder, allExpr, subExpr) {
     var noSubExpr, allTrace;

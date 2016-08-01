@@ -1,22 +1,19 @@
 import { OnInit, Component } from '@angular/core';
-import { Title } from '@angular/platform-browser';
+import { ROUTER_DIRECTIVES } from '@angular/router';
 import { NavComponent } from './nav.component'
 
 @Component({
   selector: 'demo-app',
   template: `
     <demo-nav></demo-nav> 
-    <h1>Angular Demo App Template</h1>`,
-  directives: [NavComponent]
+    <h1>Angular Demo App Template</h1>
+    <router-outlet></router-outlet>`,
+  directives: [ROUTER_DIRECTIVES, NavComponent]
 })
 export class AppComponent implements OnInit { 
-  public constructor(private titleService: Title ) { }
+  public constructor() { }
 
   ngOnInit() {
-    this.titleService.setTitle( 'ShopCo' );
   }
 
-  public setTitle( newTitle: string) {
-    this.titleService.setTitle( newTitle );
-  }
 }
