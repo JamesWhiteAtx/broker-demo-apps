@@ -11,8 +11,7 @@ export class Configuration {
     public clientID: string,
     public scopes: string[],
     public acrValues: string[]
-  ) {
-    
-    
-  }
+  ) { }
+
+  
 }

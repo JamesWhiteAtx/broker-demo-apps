@@ -3,7 +3,10 @@ import { ShopComponent } from './shop.component';
 import { ProfileComponent } from './profile.component';
 
 const ROUTES: RouterConfig = [
-  { path: '', redirectTo: '/shop', pathMatch: 'full' }, 
+  {
+    path: '',
+    component: ShopComponent
+  },
   {
     path: 'shop',
     component: ShopComponent

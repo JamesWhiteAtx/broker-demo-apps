@@ -30,7 +30,7 @@ export class ConfigService {
         var raw: any = response.json();
         return new Configuration(
           raw.IDENTITY_PROVIDER_URL, 
-          raw.RESOURCE_SERVER_UR,
+          raw.RESOURCE_SERVER_URL,
           raw.AUTHORIZE_ROUTE,
           raw.LOGOUT_ROUTE,
           raw.CLIENT_REDIRECT_URL,

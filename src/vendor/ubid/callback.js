@@ -1,5 +1,7 @@
 var ubid;
 (function (ubid) {
+    ubid.redirect = redirect;
+
     function redirect(loc) {
         if (!loc) {
             return;
@@ -9,10 +11,9 @@ var ubid;
         path = getStatePage(path, loc.hash || loc.search);
         var search = encodeURIComponent(btoa(loc.search || ''));
         var hash = encodeURIComponent(btoa(loc.hash || ''));
-        //console.log(origin + path);
         loc.replace(origin + path + '?csearch=' + search + '&chash=' + hash);
     }
-    ubid.redirect = redirect;
+
     function getStatePage(path, qStr) {
         if (!qStr) {
             return path;
@@ -24,8 +25,10 @@ var ubid;
         }
         var state = decodeURIComponent(results[2].replace(/\+/g, " "));
         var idx = state.indexOf(';');
-        if (idx + 3 < state.length) {
+        if ((idx > 0) && (idx + 3 < state.length)) {
             return path + state.substr(idx + 1) + '.html';
+        } else {
+            return path;
         }
     }
 })(ubid || (ubid = {}));

@@ -3,23 +3,23 @@ import { ROUTER_DIRECTIVES } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Branding } from './branding.service';
 import { Brand } from './brand';
-import { ConfigService } from './config.service';
-import { Configuration } from './configuration';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'demo-nav',
   templateUrl: 'app/nav.component.html',
   directives: [ROUTER_DIRECTIVES],
-  providers: [Branding, Title, ConfigService]
+  providers: [Branding, Title, AuthService]
 })
 export class NavComponent { 
   brand: Brand;
-  config: Configuration;
+  authUrl: string;
+  logoutUrl: string;
 
   public constructor(
     private branding: Branding,
     private titleService: Title,
-    private configService: ConfigService ) { }
+    private authService: AuthService) { }
   
   ngOnInit() {
     
@@ -30,10 +30,11 @@ export class NavComponent {
       }
     });
 
-    this.configService.configuration$.subscribe(config => {
-      this.config = config;
-    });
-    
+    this.authService.authUrls$().subscribe(urls => {
+        this.authUrl = urls.authUrl;
+        this.logoutUrl = urls.logoutUrl;
+      });
+
   }
   
 }

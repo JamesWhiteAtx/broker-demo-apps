@@ -99,7 +99,7 @@ function configure(dist, proxy, base) {
     },
     dist: {
       path: distPath,
-      //reload: distPath + '**/*.{html,htm,css,js,ts,json}',
+      reload: distPath + '**/*.{html,htm,css,js,ts,json}',
       clean: distPath + '**/*',
       app: distPath + 'app/',
       font: distPath + 'fonts/',
@@ -540,6 +540,8 @@ function buildWatch() {
   
   gulp.watch(cfg.src.html, {delay: cfg.src.delay}, appHtml);
 
+  gulp.watch(cfg.src.vendor.ubid, {delay: cfg.src.delay}, ubidSript);
+
   gulp.watch(cfg.src.config, {delay: cfg.src.delay}, appConfig);
   
   gulp.watch(cfg.src.vendor.load, {delay: cfg.src.delay}, sysjsLoad);
@@ -559,14 +561,35 @@ gulp.task('watch:build', buildWatch);
 
 // gulp.task('watch:dist', distWatch);
 
-// SERVE
-gulp.task('serve', gulp.series(
-    clean,
-    build,
-    server,
-    settings,
-    buildWatch
-));
+// a timeout variable
+var reloadTimer = null;
+
+// actual reload function
+function reloadLive() {
+    var reload_args = arguments;
+
+    // Stop timeout function to run livereload if this function is run within the last 250ms
+    if (reloadTimer) {
+        clearTimeout(reloadTimer);
+    }
+
+    // Check if any gulp task is still running
+    if (!gulp.isRunning) {
+        reloadTimer = setTimeout(function() {
+            $.livereload.changed.apply(null, reload_args);
+        }, 250);
+    }
+} 
+
+function reloadWatch(cb) {
+  $.livereload.listen();
+  
+  $.util.log($.util.colors.magenta('Reload watching:'), $.util.colors.cyan(cfg.dist.reload));
+  
+  gulp.watch(cfg.dist.reload, {delay: cfg.dist.delay}, function dummy(cb) {cb();}).on('change', reloadLive);
+}
+
+gulp.task('watch:reload', reloadWatch);
 
 function settings(cb) {
   $.util.log($.util.colors.magenta('Dist path:'), $.util.colors.cyan(cfg.dist.path));
@@ -574,6 +597,23 @@ function settings(cb) {
   $.util.log($.util.colors.magenta('base path:'), $.util.colors.cyan(cfg.basePath));
   cb();
 }
+
+// SERVE BROWSER SYNC
+gulp.task('serve:lite', gulp.series(
+    clean,
+    build,
+    server,
+    settings,
+    buildWatch
+));
+
+// SERVE LIVE RELOAD
+gulp.task('serve:reload', gulp.series(
+    clean,
+    build,
+    settings,
+    gulp.parallel(buildWatch, reloadWatch)
+));
 
 gulp.task('bundleTest', function(cb) {
  
