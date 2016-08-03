@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 })
 export class NavComponent { 
   brand: Brand;
+  authorized: boolean;
   authUrl: string;
   logoutUrl: string;
 
@@ -35,6 +36,14 @@ export class NavComponent {
         this.logoutUrl = urls.logoutUrl;
       });
 
+    this.authService.stateChange$.subscribe(authorized => {
+        this.authorized = authorized;
+      });
+
+  }
+
+  authToggle() {
+    this.authService.deAuthorize();
   }
   
 }

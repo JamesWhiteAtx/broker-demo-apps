@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/map';
+import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import 'rxjs/add/operator/combineLatest';
+import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/map';
 import { ConfigService } from './config.service';
 import { Configuration } from './configuration';
 import { Jwt } from './jwt'
@@ -10,22 +14,42 @@ interface UrlParms {
   [key: string]: string;
 }
 
-export class AuthParams {
-  raw: string;
-  access_token: string;
-  expires_in: string;
-  id_token: string;
-  scope: string;
-  state: string;
-  token_type: string;
-  error: string;
-  error_description: string;
+function parseParams(url: string): UrlParms {
+  var params: UrlParms = {}, regex = /([^&=]+)=([^&]*)/g, m: RegExpExecArray;
+  url = url.substring(1);
+  while (m = regex.exec(url)) {
+    params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+  }
+  return params;
+}
+
+export interface AuthParams {
+  access_token?: string;
+  expires_in?: string;
+  id_token?: string;
+  scope?: string;
+  state?: string;
+  token_type?: string;
+  error?: string;
+  error_description?: string;
+} 
+
+export class AuthValues {
+  authorized: boolean;
+  encoded: string;
+  params: AuthParams;
   bearerToken: Jwt;
   idToken: Jwt;
 
-  constructor(raw: string) {
-    this.ra
-    
+  constructor(encoded: string) {
+    this.encoded = encoded;
+    this.params = <AuthParams>parseParams(atob(decodeURIComponent(this.encoded)));
+    this.bearerToken = new Jwt(this.params.access_token);
+    this.idToken = new Jwt(this.params.id_token);
+  }
+
+  get valid(): boolean {
+    return this.bearerToken.valid;
   }
 } 
 
@@ -33,8 +57,15 @@ export class AuthUrls {
   constructor(public authUrl: string, public logoutUrl: string) { }
 } 
 
+const AUTH_VALUES_KEY = 'demo_auth_values';
+
 @Injectable()
 export class AuthService {
+
+  private encodedValues$: Subject<string> = new Subject<string>();
+  private authValues$: BehaviorSubject<AuthValues> = new BehaviorSubject<AuthValues>(null); 
+ 
+  public stateChange$: Observable<boolean>;
 
   constructor(private configService: ConfigService) {
     this.init();
@@ -46,19 +77,80 @@ export class AuthService {
       .map(cfg => new AuthUrls(this.makeAuthUrl(cfg), this.makeLogoutUrl(cfg)) );
   }
 
+  deAuthorize() {
+    this.encodedValues$.next(null);
+  }
+
   private init() {
-    var authParams: AuthParams;
-    var chash: string;
-    var searchParams: Object;
+
+    this.stateChange$ = this.authValues$
+      .map(authValues => !!authValues && !!authValues.valid)
+      .distinctUntilChanged();
+
+    this.encodedValues$
+      .subscribe(encoded => {
+        var authValues: AuthValues;
+        if (encoded) {
+          authValues = new AuthValues(encoded);
+          if (! authValues.valid) {
+            authValues = null;
+          }
+        } 
+
+        if (authValues) {
+          window.sessionStorage.setItem(AUTH_VALUES_KEY, authValues.encoded);
+        } else {
+          window.sessionStorage.removeItem(AUTH_VALUES_KEY);
+        }
+        
+        this.authValues$.next(authValues);
+    });
+
+    this.encodedValues$.next(this.loadEncodedValues());
+
+    var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
+	  
+    this.stateChange$.combineLatest(cfg$, (authorized, cfg) => {
+      return {
+        authorized: authorized,
+        cfg: cfg
+      };
+    })
+    .distinctUntilChanged()
+    .subscribe(creds => {
+      var a = this.authValues$.getValue();
+      var x = creds;
+    });
     
-    searchParams = this.parseParams(window.location.search);
+  }
+  
+  private loadEncodedValues(): string {
+    var searchParams: Object;
+    var chash: Object;
+    
+    searchParams = parseParams(window.location.search);
     if (searchParams) {
       chash = searchParams['chash'];
-      if (chash) {
-        authParams = this.decodeAuthParams(chash);
+      if (typeof chash === 'string') {  // there is a chash param
+        if (chash.length > 0) {         // the chash has a value
+          return chash;
+        } else {                        // the chash is an empty string, logout
+          return null;                  // the auth values are cleared
+        }
       }
     }
+    // if not return yet, try to read the auth values string from storage 
+    return window.sessionStorage.getItem(AUTH_VALUES_KEY);
+  }
 
+  testProfile() {
+    this.getResource();
+  }
+  
+  getResource() {
+    this.configService.configuration$.subscribe(cfg => {
+        var x = cfg;
+    });
   }
 
   private buildUrl(base: string, path: string): string {
@@ -69,25 +161,6 @@ export class AuthService {
       path = path.substring(1);
     }
     return (base || '') + '/' + (path || '');
-  }
-
-  private decodeAuthParams(encoded: string): AuthParams {
-    var authParams = <AuthParams>this.parseParams(atob(decodeURIComponent(encoded)));
-
-    authParams.raw = encoded;
-    authParams.bearerToken = new Jwt(authParams.access_token);
-    authParams.idToken = new Jwt(authParams.id_token);
-    
-    return authParams;    
-  }
-
-  private parseParams(url: string): UrlParms {
-    var params: UrlParms = {}, regex = /([^&=]+)=([^&]*)/g, m: RegExpExecArray;
-    url = url.substring(1);
-    while (m = regex.exec(url)) {
-      params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
-    }
-    return params;
   }
 
   private makeAuthUrl(cfg: Configuration) {

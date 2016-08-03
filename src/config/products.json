@@ -1,7 +1,7 @@
 {
   "preferences": [
     {
-      "id": "urn:X-UnboundID:topic:clothing:shoes",
+      "urn": "urn:X-UnboundID:topic:clothing:shoes",
       "display": "Shoes",
       "products": [
         {"id": "shoe1", "price": "100", "descr1": "Pointy Shoes", "descr2": "Red", "img": "img/shoe1.jpeg"},
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "id": "urn:X-UnboundID:topic:clothing:impress",
+      "urn": "urn:X-UnboundID:topic:clothing:impress",
       "display": "I'm Impressed!",
       "products": [
         {"id": "hat1", "price": "500", "descr1": "Top Hat", "descr2": "Black", "img": "img/hat1.jpeg"},
@@ -22,7 +22,7 @@
       ]
     },
     {
-      "id": "urn:X-UnboundID:topic:clothing:workout",
+      "urn": "urn:X-UnboundID:topic:clothing:workout",
       "display": "Working Out",
       "products": [
         {"id": "bells1", "price": "50", "descr1": "Kettle Bells", "descr2": "5 lb", "img": "img/bells1.jpeg"},
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "id": "urn:X-UnboundID:topic:clothing:casual",
+      "urn": "urn:X-UnboundID:topic:clothing:casual",
       "display": "Casual Wear",
       "products": [
         {"id": "sweat1", "price": "25", "descr1": "Sweat Pant", "descr2": "Grey", "img": "img/sweat1.jpeg"},
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "id": "urn:X-UnboundID:topic:clothing:accessories",
+      "urn": "urn:X-UnboundID:topic:clothing:accessories",
       "display": "Accessorize!",
       "products": [
         {"id": "bag1", "price": "550", "descr1": "Rochambeau Hand Bag", "descr2": "Silver", "img": "img/bag1.jpeg"},
@@ -52,13 +52,16 @@
       ]
     }
   ],
-  "offers": {
-    "display": "Offers",
-    "products": [
-      {"id": "mahjong1", "price": "123", "descr1": "Mahjong1 Set", "descr2": "Scarlet", "img": "img/mahjong1.jpeg"},
-      {"id": "dom1", "price": "55", "descr1": "Dominoes Set", "descr2": "Ebony", "img": "img/dom1.jpeg"},
-      {"id": "dom2", "price": "56", "descr1": "Dominoes Set", "descr2": "Scrimshaw", "img": "img/dom2.jpeg"},
-      {"id": "dom3", "price": "76", "descr1": "Dominoes Set", "descr2": "Jaune", "img": "img/dom3.jpeg"}
-    ]
-  }
+  "general": [
+    {
+      "display": "Offers",
+      "products": [
+        {"id": "mahjong1", "price": "123", "descr1": "Mahjong1 Set", "descr2": "Scarlet", "img": "img/mahjong1.jpeg"},
+        {"id": "dom1", "price": "55", "descr1": "Dominoes Set", "descr2": "Ebony", "img": "img/dom1.jpeg"},
+        {"id": "dom2", "price": "56", "descr1": "Dominoes Set", "descr2": "Scrimshaw", "img": "img/dom2.jpeg"},
+        {"id": "dom3", "price": "76", "descr1": "Dominoes Set", "descr2": "Jaune", "img": "img/dom3.jpeg"}
+      ]
+    }
+  ]
+    
 }

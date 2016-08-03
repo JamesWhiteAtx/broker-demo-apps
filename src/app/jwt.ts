@@ -20,9 +20,44 @@ export interface JwtPayload {
 export class Jwt {
   header: JwtHeader;
   payload: JwtPayload;
+  expirationDate: Date;
+  private _valid: boolean = false;
+
   constructor(raw: string) {
     var parts = raw.split('.');
+    
+    if (parts.length !== 3) {
+      throw new Error('JWT must have 3 parts');
+    }
+
     this.header = <JwtHeader>JSON.parse(atob(parts[0]));
-    this.payload = <JwtPayload>JSON.parse(atob(parts[1]));    
+    this.payload = <JwtPayload>JSON.parse(atob(parts[1]));
+
+    if (typeof this.payload.exp === 'undefined') {
+      this.expirationDate = null;
+    } else if (typeof this.payload.exp === 'number') {
+      var expDate = new Date(0);
+      expDate.setUTCSeconds(this.payload.exp);
+      this.expirationDate = expDate;
+    } else {
+      throw new Error('JWT has invalid expiration date');
+    }
+
+    this._valid = true;
   }
+
+  get valid(): boolean {
+    if (this._valid) {
+      this._valid = ! this.expired();
+    }
+    return this._valid;
+  }
+
+  expired(): boolean {
+    if (this.expirationDate === null) {
+      return false;
+    }
+    return Date.now() > this.expirationDate.valueOf();
+  }
+
 }

@@ -1,31 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/share';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Configuration } from './configuration';
 
 @Injectable()
 export class ConfigService {
+  
+  public configuration$: Observable<Configuration>;
 
-  private configuration: BehaviorSubject<Configuration> = new BehaviorSubject(null);
-  public configuration$: Observable<Configuration> = this.configuration.asObservable();
-
-  /**
-   *
-   */
   constructor(private http: Http) {
-    this.init();    
-  }
-
-  private init() {
-    this.load().subscribe((brand: Configuration) => {
-      this.configuration.next(brand); 
-    });
-  }
-
-  private load(): Observable<Configuration> {
-    return this.http.get('config/config.json')
+    this.configuration$ = this.http.get('config/config.json')
       .map(response => {
         var raw: any = response.json();
         return new Configuration(
@@ -38,6 +25,8 @@ export class ConfigService {
           raw.SCOPES,
           raw.ACR_VALUES
         );
-      });
+      })
+      .share();
   }
+
 }
