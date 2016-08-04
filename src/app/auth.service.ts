@@ -64,8 +64,7 @@ export class AuthService {
 
   private encodedValues$: Subject<string> = new Subject<string>();
   private authValues$: BehaviorSubject<AuthValues> = new BehaviorSubject<AuthValues>(null); 
- 
-  public stateChange$: Observable<boolean>;
+  public authorized$: Observable<boolean>;
 
   constructor(private configService: ConfigService) {
     this.init();
@@ -83,8 +82,10 @@ export class AuthService {
 
   private init() {
 
-    this.stateChange$ = this.authValues$
-      .map(authValues => !!authValues && !!authValues.valid)
+    this.authorized$ = this.authValues$
+      .map(authValues => {
+        return !!authValues && !!authValues.valid;
+      })
       .distinctUntilChanged();
 
     this.encodedValues$
@@ -110,7 +111,7 @@ export class AuthService {
 
     var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
 	  
-    this.stateChange$.combineLatest(cfg$, (authorized, cfg) => {
+    this.authorized$.combineLatest(cfg$, (authorized, cfg) => {
       return {
         authorized: authorized,
         cfg: cfg

@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
   selector: 'demo-nav',
   templateUrl: 'app/nav.component.html',
   directives: [ROUTER_DIRECTIVES],
-  providers: [Branding, Title, AuthService]
+  providers: [Title]
 })
 export class NavComponent { 
   brand: Brand;
@@ -19,31 +19,31 @@ export class NavComponent {
 
   public constructor(
     private branding: Branding,
-    private titleService: Title,
-    private authService: AuthService) { }
+    private title: Title,
+    private auth: AuthService) { }
   
   ngOnInit() {
     
     this.branding.brand$.subscribe(brand => {
       this.brand = brand;
       if (this.brand && this.brand.title) {
-        this.titleService.setTitle( this.brand.title );
+        this.title.setTitle( this.brand.title );
       }
     });
 
-    this.authService.authUrls$().subscribe(urls => {
+    this.auth.authUrls$().subscribe(urls => {
         this.authUrl = urls.authUrl;
         this.logoutUrl = urls.logoutUrl;
       });
 
-    this.authService.stateChange$.subscribe(authorized => {
+    this.auth.authorized$.subscribe(authorized => {
         this.authorized = authorized;
       });
 
   }
 
   authToggle() {
-    this.authService.deAuthorize();
+    this.auth.deAuthorize();
   }
   
 }

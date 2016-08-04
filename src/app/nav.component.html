@@ -64,10 +64,10 @@
   </div>
   <p>
     <button (click)="authToggle()">Auth toggle</button>
-    <span>Authorized:</span> <span>{{authService.stateChange$ | async}}</span>/
-    <span *ngIf="(authService.stateChange$ | async)">Yes</span>
-    <span *ngIf="!(authService.stateChange$ | async)">No</span>
-    --<button (click)="authService.testProfile()">profile</button>
+    <span>Authorized:</span> <span>{{auth.authorized$ | async}}</span>/
+    <span *ngIf="(auth.authorized$ | async)">Yes</span>
+    <span *ngIf="!(auth.authorized$ | async)">No</span>
+    --<button (click)="auth.testProfile()">profile</button>
   </p>
   
 </nav>

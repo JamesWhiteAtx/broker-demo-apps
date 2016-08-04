@@ -1,42 +1,51 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
+import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/share';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-//import { Brand } from './brand';
+import { AuthService } from './auth.service';
 
-export class Product {
-  constructor(
-    public id: string,
-    public price: number,
-    public descr1: string,
-    public descr2: string,
-    public img: string) { 
-  }
+export interface Product {
+  id: string;
+	price: number;
+  descr1: string;
+  descr2: string;
+  img: string; 
 }
 
-export class Group {
-  constructor(
-    public urn: string,
-    public display: string,
-    public poducts: Product[]) {
-  }
+export interface Group {
+  urn: string;
+  display: string;
+  products: Product[];
 }
 
 @Injectable()
 export class ProductService {
 
-  public preferences$: Observable<Group[]>;
-  public general$: Observable<Group[]>;
-  public sections$: Observable<any>;
+  groups$: Observable<Group[]>;
+  private products$: Observable<any>;
 
-  constructor(private http: Http) {
-    this.sections$ = this.http.get('config/products.json')
+  constructor(
+    private http: Http, 
+    private auth: AuthService) {
+    
+    this.products$ = this.http.get('config/products.json')
       .map(response => {
         var raw: any = response.json();
         return raw;
       })
       .share();
+
+    this.groups$ = this.products$
+      .combineLatest(this.auth.authorized$, (products, authorized) => {
+        var groups: Group[];
+        if (authorized) {
+          groups = products.preferences;
+        } else {
+          groups = products.general;
+        }
+        return groups;
+      });
   }
 }
