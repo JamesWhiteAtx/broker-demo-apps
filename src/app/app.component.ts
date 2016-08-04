@@ -5,6 +5,7 @@ import { ConfigService } from './config.service';
 import { Branding } from './branding.service';
 import { AuthService } from './auth.service';
 import { ProductService } from './product.service';
+import { ProfileService } from './profile.service';
 
 @Component({
   selector: 'demo-app',
@@ -12,12 +13,11 @@ import { ProductService } from './product.service';
     <demo-nav></demo-nav> 
     <router-outlet></router-outlet>`,
   directives: [ROUTER_DIRECTIVES, NavComponent],
-  providers: [ConfigService, Branding, ProductService, AuthService]
+  providers: [ConfigService, Branding, AuthService, ProductService, ProfileService]
 })
 export class AppComponent implements OnInit { 
-  public constructor() { }
-
-  ngOnInit() {
-  }
+  
+  //public constructor() { }
+  ngOnInit() { }
 
 }

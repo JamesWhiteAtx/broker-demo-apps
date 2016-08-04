@@ -63,18 +63,22 @@ const AUTH_VALUES_KEY = 'demo_auth_values';
 export class AuthService {
 
   private encodedValues$: Subject<string> = new Subject<string>();
-  private authValues$: BehaviorSubject<AuthValues> = new BehaviorSubject<AuthValues>(null); 
-  public authorized$: Observable<boolean>;
+  private authValues$: Subject<AuthValues> = new Subject<AuthValues>();
+
+  private authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false); 
+  public authorized$: Observable<boolean> = this.authorized.asObservable().distinctUntilChanged();
+
+  public profile$: Observable<any>;
 
   constructor(private configService: ConfigService) {
     this.init();
   }
 
-  authUrls$(): Observable<AuthUrls> {
-    return this.configService.configuration$
-      .filter(cfg => !!cfg)
-      .map(cfg => new AuthUrls(this.makeAuthUrl(cfg), this.makeLogoutUrl(cfg)) );
-  }
+  // authUrls$(): Observable<AuthUrls> {
+  //   return this.configService.configuration$
+  //     .filter(cfg => !!cfg)
+  //     .map(cfg => new AuthUrls(this.makeAuthUrl(cfg), this.makeLogoutUrl(cfg)) );
+  // }
 
   deAuthorize() {
     this.encodedValues$.next(null);
@@ -82,21 +86,35 @@ export class AuthService {
 
   private init() {
 
-    this.authValues$.subscribe(v => {
-      var x = v;
-    });
-    var d = this.authValues$
-      .map(authValues => {
-        return !!authValues && !!authValues.valid;
-      });
-
-    this.authorized$ = this.authValues$
-      .map(authValues => {
-        return !!authValues && !!authValues.valid;
+    var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
+    var vals$ = this.authValues$.filter(vals => !!vals);
+	  
+    this.profile$ = this.authorized$
+        .combineLatest(vals$, cfg$, (authorized, vals, cfg) => {
+        return {
+          vals: vals,
+          authorized: authorized,
+          cfg: cfg
+        };
       })
-      //.distinctUntilChanged()
-      //.share()
-      ;
+      .distinctUntilChanged()
+      .map(x => {
+        return {name: 'Sammy Bean'};
+      })
+      .share();
+    // .subscribe(creds => {
+    //   var x = creds;
+    // });
+
+    // this.authorized$.subscribe(val => {
+    //   this.trig(val);
+    // });
+    // this.authValues.subscribe(val => {
+    //   this.trig(val);
+    // });
+    // this.configService.configuration$.subscribe(val => {
+    //   this.trig(val);
+    // });
 
     this.encodedValues$
       .subscribe(encoded => {
@@ -107,34 +125,23 @@ export class AuthService {
             authValues = null;
           }
         } 
-
         if (authValues) {
           window.sessionStorage.setItem(AUTH_VALUES_KEY, authValues.encoded);
         } else {
           window.sessionStorage.removeItem(AUTH_VALUES_KEY);
         }
-        
         this.authValues$.next(authValues);
       });
 
-    this.encodedValues$.next(this.loadEncodedValues());
+    this.authValues$
+      .subscribe(authValues => {
+        var authorized = !!authValues && !!authValues.valid;
+        this.authorized.next(authorized);
+      });
 
-    // var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
-	  
-    // this.authorized$.combineLatest(cfg$, (authorized, cfg) => {
-    //   return {
-    //     authorized: authorized,
-    //     cfg: cfg
-    //   };
-    // })
-    // .distinctUntilChanged()
-    // .subscribe(creds => {
-    //   var a = this.authValues$.getValue();
-    //   var x = creds;
-    // });
-    
+    this.encodedValues$.next(this.loadEncodedValues());
   }
-  
+
   private loadEncodedValues(): string {
     var searchParams: Object;
     var chash: Object;
@@ -154,50 +161,20 @@ export class AuthService {
     return window.sessionStorage.getItem(AUTH_VALUES_KEY);
   }
 
+  
+  private trig(val: any) {
+    var x = 2;
+  }
+  
   testProfile() {
     this.getResource();
   }
   
-  getResource() {
-    this.configService.configuration$.subscribe(cfg => {
-        var x = cfg;
-    });
-  }
-
-  private buildUrl(base: string, path: string): string {
-    if (base && base.lastIndexOf('/') === base.length - 1) {
-      base = base.substring(0, base.length - 1);
-    }
-    if (path && path.indexOf('/') === 0) {
-      path = path.substring(1);
-    }
-    return (base || '') + '/' + (path || '');
-  }
-
-  private makeAuthUrl(cfg: Configuration) {
-    var state = this.makeState();
-	  
-    return this.buildUrl(cfg.identityProviderUrl,cfg.authorizeRoute) + '?' +
-      'response_type=' + encodeURIComponent('token id_token') + '&' +
-      'client_id=' + encodeURIComponent(cfg.clientID) + '&' +
-      'redirect_uri=' + encodeURIComponent(cfg.clientRedirectUrl) + '&' +
-      'scope=' + encodeURIComponent(cfg.scopes.join(' ')) + '&' +
-      'acr_values=' + encodeURIComponent(cfg.acrValues.join(' ')) + '&' +
-      'nonce=' + encodeURIComponent(state) + '&' +
-      'state=' + encodeURIComponent(state);
-  }
-
-  private makeLogoutUrl(cfg: Configuration) {
-    return this.buildUrl(cfg.identityProviderUrl, cfg.logoutRoute) + '?' +
-      'post_logout_redirect_uri=' + encodeURIComponent(cfg.clientRedirectUrl) + '&' +
-      'state=' + encodeURIComponent(this.makeState());
-  }
-
-  private makeState(): string {
-    var rand = Math.floor(Math.random() * (999999 - 0 + 1)) + 0;
-    var state = rand.toString();
-    return state;
-  }
-
+  // getResource() {
+  //   this.configService.configuration$.subscribe(cfg => {
+  //       var x = cfg;
+  //   });
+  // }
+ 
 }          
     

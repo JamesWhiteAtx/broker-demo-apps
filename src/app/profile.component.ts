@@ -6,7 +6,7 @@ import { Component, OnInit } from '@angular/core';
     <h1>Profile template</h1>
   `
 })
-export class ProfileComponent { 
+export class ProfileComponent implements OnInit { 
   public constructor() { }
   ngOnInit() {
   }

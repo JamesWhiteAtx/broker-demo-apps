@@ -17,7 +17,7 @@
         <li class="dropdown" *ngIf="authorized">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-user"></i>
-            <span *ngIf="authorized">userName</span>
+            <span *ngIf="authorized">{{profile?.userName}}</span>
             <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li *ngIf="authorized" routerLinkActive="active">
@@ -68,6 +68,7 @@
     <span *ngIf="(auth.authorized$ | async)">Yes</span>
     <span *ngIf="!(auth.authorized$ | async)">No</span>
     --<button (click)="auth.testProfile()">profile</button>
+    <span>un:{{profile?.userName}}</span>
   </p>
   
 </nav>

@@ -34,8 +34,7 @@ export class ProductService {
       .map(response => {
         var raw: any = response.json();
         return raw;
-      })
-      .share();
+      });
 
     this.groups$ = this.products$
       .combineLatest(this.auth.authorized$, (products, authorized) => {
@@ -46,6 +45,7 @@ export class ProductService {
           groups = products.general;
         }
         return groups;
-      });
+      })
+      .share();
   }
 }
