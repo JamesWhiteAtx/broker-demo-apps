@@ -82,11 +82,21 @@ export class AuthService {
 
   private init() {
 
+    this.authValues$.subscribe(v => {
+      var x = v;
+    });
+    var d = this.authValues$
+      .map(authValues => {
+        return !!authValues && !!authValues.valid;
+      });
+
     this.authorized$ = this.authValues$
       .map(authValues => {
         return !!authValues && !!authValues.valid;
       })
-      .distinctUntilChanged();
+      //.distinctUntilChanged()
+      //.share()
+      ;
 
     this.encodedValues$
       .subscribe(encoded => {
@@ -105,23 +115,23 @@ export class AuthService {
         }
         
         this.authValues$.next(authValues);
-    });
+      });
 
     this.encodedValues$.next(this.loadEncodedValues());
 
-    var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
+    // var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
 	  
-    this.authorized$.combineLatest(cfg$, (authorized, cfg) => {
-      return {
-        authorized: authorized,
-        cfg: cfg
-      };
-    })
-    .distinctUntilChanged()
-    .subscribe(creds => {
-      var a = this.authValues$.getValue();
-      var x = creds;
-    });
+    // this.authorized$.combineLatest(cfg$, (authorized, cfg) => {
+    //   return {
+    //     authorized: authorized,
+    //     cfg: cfg
+    //   };
+    // })
+    // .distinctUntilChanged()
+    // .subscribe(creds => {
+    //   var a = this.authValues$.getValue();
+    //   var x = creds;
+    // });
     
   }
   
