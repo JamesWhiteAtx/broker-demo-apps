@@ -1,13 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/map';
-import { ConfigService } from './config.service';
-import { Configuration } from './configuration';
 import { Jwt } from './jwt'
 
 interface UrlParms {
@@ -34,27 +28,37 @@ export interface AuthParams {
   error_description?: string;
 } 
 
-export class AuthValues {
-  authorized: boolean;
+export class AuthState {
   encoded: string;
-  params: AuthParams;
   bearerToken: Jwt;
   idToken: Jwt;
 
-  constructor(encoded: string) {
-    this.encoded = encoded;
-    this.params = <AuthParams>parseParams(atob(decodeURIComponent(this.encoded)));
-    this.bearerToken = new Jwt(this.params.access_token);
-    this.idToken = new Jwt(this.params.id_token);
+  private _authorized: boolean;
+
+  constructor(encoded?: string) {
+    var params: AuthParams;
+    if (encoded) {
+      this.encoded = encoded;
+      params = <AuthParams>parseParams(atob(decodeURIComponent(this.encoded)));
+      this.bearerToken = new Jwt(params.access_token);
+      this.idToken = new Jwt(params.id_token);
+      
+      this._authorized = this.bearerToken.valid;
+    } else {
+      this._authorized = false;
+    }
   }
 
-  get valid(): boolean {
-    return this.bearerToken.valid;
+  get authorized(): boolean {
+    if (this._authorized) {
+      this._authorized = this.bearerToken.valid;
+    }
+    return this._authorized;
   }
-} 
 
-export class AuthUrls {
-  constructor(public authUrl: string, public logoutUrl: string) { }
+  private decode(encoded: string): AuthParams {
+    return parseParams(atob(decodeURIComponent(this.encoded)));
+  }
 } 
 
 const AUTH_VALUES_KEY = 'demo_auth_values';
@@ -62,84 +66,45 @@ const AUTH_VALUES_KEY = 'demo_auth_values';
 @Injectable()
 export class AuthService {
 
-  private encodedValues$: Subject<string> = new Subject<string>();
-  private authValues$: Subject<AuthValues> = new Subject<AuthValues>();
+  private _state: BehaviorSubject<AuthState>;
+  public state$: Observable<AuthState>;
+  private _authorized: BehaviorSubject<boolean>;
+  public authorized$: Observable<boolean>;
 
-  private authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false); 
-  public authorized$: Observable<boolean> = this.authorized.asObservable().distinctUntilChanged();
-
-  public profile$: Observable<any>;
-
-  constructor(private configService: ConfigService) {
+  constructor() {
     this.init();
   }
-
-  // authUrls$(): Observable<AuthUrls> {
-  //   return this.configService.configuration$
-  //     .filter(cfg => !!cfg)
-  //     .map(cfg => new AuthUrls(this.makeAuthUrl(cfg), this.makeLogoutUrl(cfg)) );
-  // }
-
+  
   deAuthorize() {
-    this.encodedValues$.next(null);
+    this.decodeAuth(null);
   }
 
   private init() {
+  	this._state = new BehaviorSubject<AuthState>(new AuthState());
+    this.state$ = this._state.asObservable();
 
-    var cfg$ = this.configService.configuration$.filter(cfg => !!cfg);
-    var vals$ = this.authValues$.filter(vals => !!vals);
-	  
-    this.profile$ = this.authorized$
-        .combineLatest(vals$, cfg$, (authorized, vals, cfg) => {
-        return {
-          vals: vals,
-          authorized: authorized,
-          cfg: cfg
-        };
-      })
-      .distinctUntilChanged()
-      .map(x => {
-        return {name: 'Sammy Bean'};
-      })
-      .share();
-    // .subscribe(creds => {
-    //   var x = creds;
-    // });
+    this._authorized = new BehaviorSubject<boolean>(false);
+    this.authorized$ = this._authorized.asObservable().distinctUntilChanged();
 
-    // this.authorized$.subscribe(val => {
-    //   this.trig(val);
-    // });
-    // this.authValues.subscribe(val => {
-    //   this.trig(val);
-    // });
-    // this.configService.configuration$.subscribe(val => {
-    //   this.trig(val);
-    // });
-
-    this.encodedValues$
-      .subscribe(encoded => {
-        var authValues: AuthValues;
-        if (encoded) {
-          authValues = new AuthValues(encoded);
-          if (! authValues.valid) {
-            authValues = null;
-          }
-        } 
-        if (authValues) {
-          window.sessionStorage.setItem(AUTH_VALUES_KEY, authValues.encoded);
-        } else {
-          window.sessionStorage.removeItem(AUTH_VALUES_KEY);
-        }
-        this.authValues$.next(authValues);
+    this.state$ 
+      .subscribe(state => {
+        var authorized = !!state && !!state.authorized;
+        this._authorized.next(authorized);
       });
 
-    this.authValues$
-      .subscribe(authValues => {
-        var authorized = !!authValues && !!authValues.valid;
-        this.authorized.next(authorized);
-      });
+    this.decodeAuth(this.loadEncodedValues());
+  }
 
-    this.encodedValues$.next(this.loadEncodedValues());
+  private decodeAuth(encoded) {
+    var state: AuthState = new AuthState(encoded);
+    
+    if (state.authorized) {
+      window.sessionStorage.setItem(AUTH_VALUES_KEY, state.encoded);
+    } else {
+      window.sessionStorage.removeItem(AUTH_VALUES_KEY);
+    }
+
+    this._state.next(state);
   }
 
   private loadEncodedValues(): string {
@@ -161,20 +126,5 @@ export class AuthService {
     return window.sessionStorage.getItem(AUTH_VALUES_KEY);
   }
 
-  
-  private trig(val: any) {
-    var x = 2;
-  }
-  
-  testProfile() {
-    this.getResource();
-  }
-  
-  // getResource() {
-  //   this.configService.configuration$.subscribe(cfg => {
-  //       var x = cfg;
-  //   });
-  // }
- 
 }          
     

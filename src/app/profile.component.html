@@ -1,0 +1,66 @@
+<div class="container">
+  <h4>Profile</h4>
+  <div class="row" *ngIf="profile">
+    <div class="col-md-9">
+      <form class="form-horizontal" role="form">
+        
+        <div class="form-group" *ngIf="profile?.name?.formatted">
+          <label class="col-sm-2 control-label">Name</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{ profile.name.formatted }}</p>
+          </div>
+          
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Username</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{ profile.userName }}</p>
+          </div>
+        </div>
+
+        <div class="form-group" *ngFor="let email of profile.emails">
+          <label class="col-sm-2 control-label">Email</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{ email.value }}</p>
+          </div>
+        </div>
+
+        <div class="form-group" *ngFor="let address of profile.addresses">
+          <label class="col-sm-2 control-label">Address </label>
+          <div class="col-sm-10">
+            <p class="form-control-static">
+              <span>{{ address.streetAddress }}</span>,
+              <span>{{ address.locality }}</span>,
+              <span>{{ address.region }}</span>,
+              <span>{{ address.postalCode }}</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="form-group" *ngFor="let phone of profile.phoneNumbers">
+          <label class="col-sm-2 control-label">Phone</label>
+          <div class="col-sm-10">
+            <p class="form-control-static">{{ phone.value }}</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Preferences</label>
+          <div class="col-sm-10">
+            <div *ngFor="let preference of profile.preferences"> 
+              {{preference | json}}
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+    <div class="col-md-3">
+      <div class="profile-image">
+        <img [src]="profile.photoUrl || 'img/placeholder-user.png'"
+            alt="user icon">
+      </div>
+    </div>
+  </div>
+</div>

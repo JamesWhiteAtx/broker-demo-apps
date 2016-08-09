@@ -6,6 +6,7 @@ import { Branding } from './branding.service';
 import { AuthService } from './auth.service';
 import { ProductService } from './product.service';
 import { ProfileService } from './profile.service';
+import { CartService } from './cart.service';
 
 @Component({
   selector: 'demo-app',
@@ -13,7 +14,7 @@ import { ProfileService } from './profile.service';
     <demo-nav></demo-nav> 
     <router-outlet></router-outlet>`,
   directives: [ROUTER_DIRECTIVES, NavComponent],
-  providers: [ConfigService, Branding, AuthService, ProductService, ProfileService]
+  providers: [ConfigService, Branding, AuthService, ProductService, ProfileService, CartService]
 })
 export class AppComponent implements OnInit { 
   

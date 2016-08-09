@@ -18,14 +18,17 @@ export interface JwtPayload {
 }
 
 export class Jwt {
+  encoded: string;
   header: JwtHeader;
   payload: JwtPayload;
   expirationDate: Date;
   private _valid: boolean = false;
 
-  constructor(raw: string) {
-    var parts = raw.split('.');
+  constructor(encoded: string) {
+    var parts: string[];
     
+    this.encoded = encoded;
+    parts = this.encoded.split('.');
     if (parts.length !== 3) {
       throw new Error('JWT must have 3 parts');
     }

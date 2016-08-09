@@ -49,12 +49,12 @@
         </li>
 
         <li class="cart {%if page == 'review' %}active{% endif %}">
-          <a href="#" title="View your shopping cart">
+          <a routerLink="/review" title="View your shopping cart">
             <i class="fa fa-shopping-cart fa-lg"></i>
             <span class="visible-xs-inline visible-lg-inline">Cart</span>
             <span>  
-              (<span class="cart-val">xx cart.qty xx</span>)
-              <span class="cart-val">xx cart.total | currency xx</span>
+              (<span class="cart-val">{{cart.qty$ | async}}</span>)
+              <span class="cart-val">{{ cart.total$ | async | currency:'USD':true }}</span>
             </span>
           </a>
         </li>
@@ -62,13 +62,13 @@
       </ul>
     </div>
   </div>
-  <p>
+  <!--<p>
     <button (click)="authToggle()">Auth toggle</button>
     <span>Authorized:</span> <span>{{auth.authorized$ | async}}</span>/
     <span *ngIf="(auth.authorized$ | async)">Yes</span>
     <span *ngIf="!(auth.authorized$ | async)">No</span>
     --<button (click)="auth.testProfile()">profile</button>
     <span>un:{{profile?.userName}}</span>
-  </p>
+  </p>-->
   
 </nav>

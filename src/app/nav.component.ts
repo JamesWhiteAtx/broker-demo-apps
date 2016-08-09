@@ -6,6 +6,7 @@ import { Brand } from './brand';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
 import { Profile, ProfileService } from './profile.service';
+import { CartService } from './cart.service';
 
 @Component({
   selector: 'demo-nav',
@@ -25,7 +26,8 @@ export class NavComponent implements OnInit {
     private title: Title,
     private auth: AuthService,
     private config: ConfigService,
-    private profileService: ProfileService) { }
+    private profileService: ProfileService,
+    private cart: CartService) { }
   
   ngOnInit() {
     
@@ -48,7 +50,7 @@ export class NavComponent implements OnInit {
         this.authorized = authorized;
       });
 
-    this.profileService.current$
+    this.profileService.profile$
       .subscribe(profile => {
         this.profile = profile;
       });

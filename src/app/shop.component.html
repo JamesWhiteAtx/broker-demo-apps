@@ -2,11 +2,9 @@
 
   <div class="row recommendations" *ngIf="(auth.authorized$ | async)">
     <div class="col-sm-12">
-      <h1>Recommendations for You, {{(profile.current$ | async)?.userName}}</h1>
+      <h1>Recommendations for You, {{(profile.profile$ | async)?.name?.givenName}}</h1>
     </div>
   </div>
-
-  
 
   <div *ngFor="let group of products.groups$ | async">
 
@@ -21,7 +19,7 @@
         <figure>
           <img [src]="product.img" class="img-responsive" alt="">
         </figure>
-        <a href="#" >
+        <a href="#" (click)="buy(product)">
           <div class="hover-container">
             <h2>{{product.descr1}}</h2>
             <hr>
