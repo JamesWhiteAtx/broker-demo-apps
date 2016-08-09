@@ -13,15 +13,12 @@ export interface Profile {
 @Injectable()
 export class ProfileService {
 
-  private _profile: BehaviorSubject<Profile>;
-  public profile$: Observable<Profile>;
+  private _profile: BehaviorSubject<Profile> = new BehaviorSubject<Profile>(null);
+  public profile$: Observable<Profile> = this._profile.asObservable();
 
   constructor(
     private http: Http,
     private auth: AuthService) {
-
-    this._profile = new BehaviorSubject<Profile>(null);
-    this.profile$ = this._profile.asObservable();
 
     this.auth.authorized$
       .combineLatest(this.auth.state$, (authorized: boolean, state: AuthState) => {

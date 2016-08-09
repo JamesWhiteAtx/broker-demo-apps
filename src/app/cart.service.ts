@@ -20,10 +20,12 @@ const CART_KEY = 'demo_cart';
 
 @Injectable()
 export class CartService {
-  private _items: BehaviorSubject<Item[]>;
-  public items$: Observable<Item[]>;
-  public qty$: Observable<number>;
-  public total$: Observable<number>;  
+  private _items: BehaviorSubject<Item[]> = new BehaviorSubject<Item[]>([]);
+  public items$: Observable<Item[]> = this._items.asObservable();
+  private _qty: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  public qty$: Observable<number> = this._qty.asObservable();
+  private _total: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  public total$: Observable<number> = this._total.asObservable();  
 
   private user: string;
   private last: string;
@@ -31,27 +33,6 @@ export class CartService {
   constructor(
     private profileService: ProfileService,
     private products: ProductService) {
-
-    this._items = new BehaviorSubject<Item[]>([]);
-    this.items$ = this._items.asObservable();
-
-    this.qty$ = this.items$.map<number>(items => {
-      var qty: number = 0;
-      items.forEach(item => {
-        qty += item.qty;
-      });
-      return qty;
-    })
-    .share();
-
-    this.total$ = this.items$.map<number>(items => {
-      var total: number = 0;
-      items.forEach(item => {
-        total += item.qty * item.price;
-      });
-      return total;
-    })
-    .share();
 
     this.profileService.profile$.distinctUntilChanged()
       .subscribe(profile => {
@@ -65,17 +46,11 @@ export class CartService {
         this._items.next(stored.items);
       });
     
-    this.items$
-      .subscribe(items => {
-          var serialized = window.sessionStorage.getItem(CART_KEY);
-          var stored = this.getStoredCart();
-
-          stored.last = this.user || stored.last;
-          stored.items = items;
-
-          window.sessionStorage.setItem(CART_KEY, JSON.stringify(stored));
-      });
-    
+    this.items$.subscribe(items => {
+      this.updateStored(items);
+      this.updateQty(items);
+      this.updateTotal(items);
+    });
   }
 
   add(item: Item) {
@@ -118,4 +93,31 @@ export class CartService {
     stored.items = stored.items || [];
     return stored;
   }
+
+	private updateStored(items: Item[]) {
+    var serialized = window.sessionStorage.getItem(CART_KEY);
+    var stored = this.getStoredCart();
+
+    stored.last = this.user || stored.last;
+    stored.items = items;
+
+    window.sessionStorage.setItem(CART_KEY, JSON.stringify(stored));
+  }
+  
+  private updateQty(items: Item[]) {
+    var qty: number = 0;
+    items.forEach(item => {
+      qty += item.qty;
+    });
+    this._qty.next(qty);
+  }
+
+  private updateTotal(items: Item[]) {
+    var total: number = 0;
+    items.forEach(item => {
+      total += item.qty * item.price;
+    });
+    this._total.next(total);
+  }
+  
 }

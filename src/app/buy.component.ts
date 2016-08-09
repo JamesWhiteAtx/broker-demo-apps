@@ -10,7 +10,10 @@ import { CartService, Item } from './cart.service';
   directives: [ROUTER_DIRECTIVES]
 })
 export class BuyComponent implements OnInit {
+  
   item: Item;
+  private cartQty: number;
+
   constructor(
     private route: ActivatedRoute,
     private products: ProductService,
@@ -31,6 +34,8 @@ export class BuyComponent implements OnInit {
         this.item = null;
       }
     });
+
+    this.cart.qty$.subscribe(qty => this.cartQty = qty);
   }
 
   inc() {

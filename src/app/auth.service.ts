@@ -66,10 +66,10 @@ const AUTH_VALUES_KEY = 'demo_auth_values';
 @Injectable()
 export class AuthService {
 
-  private _state: BehaviorSubject<AuthState>;
-  public state$: Observable<AuthState>;
-  private _authorized: BehaviorSubject<boolean>;
-  public authorized$: Observable<boolean>;
+  private _state: BehaviorSubject<AuthState> = new BehaviorSubject<AuthState>(new AuthState());
+  public state$: Observable<AuthState> = this._state.asObservable();
+  private _authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public authorized$: Observable<boolean> = this._authorized.asObservable().distinctUntilChanged();
 
   constructor() {
     this.init();
@@ -80,12 +80,6 @@ export class AuthService {
   }
 
   private init() {
-  	this._state = new BehaviorSubject<AuthState>(new AuthState());
-    this.state$ = this._state.asObservable();
-
-    this._authorized = new BehaviorSubject<boolean>(false);
-    this.authorized$ = this._authorized.asObservable().distinctUntilChanged();
-
     this.state$ 
       .subscribe(state => {
         var authorized = !!state && !!state.authorized;

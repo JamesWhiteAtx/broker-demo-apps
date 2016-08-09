@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
@@ -49,10 +49,10 @@ class ProdData {
 @Injectable()
 export class ProductService {
 
-  private _data: BehaviorSubject<ProdData> = new BehaviorSubject<ProdData>(null);
+  private _data: ReplaySubject<ProdData> = new ReplaySubject<ProdData>(1);
   public data$: Observable<ProdData> = this._data.asObservable();
 
-  private _groups: BehaviorSubject<Group[]> = new BehaviorSubject<Group[]>([]);
+  private _groups: ReplaySubject<Group[]> = new ReplaySubject<Group[]>(1);
   public groups$: Observable<Group[]> = this._groups.asObservable();
 
   constructor(
