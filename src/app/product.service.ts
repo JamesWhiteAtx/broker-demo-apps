@@ -6,7 +6,7 @@ import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/share';
-import { AuthService } from './auth.service';
+import { Profile, ProfileService } from './profile.service';
 
 export interface Product {
   id: string;
@@ -57,7 +57,7 @@ export class ProductService {
 
   constructor(
     private http: Http, 
-    private auth: AuthService) {
+    private profileService: ProfileService) {
 
     this.http.get('config/products.json')
       .map<ProdData>(response => {
@@ -68,11 +68,11 @@ export class ProductService {
       });
 
     this.data$
-      .combineLatest(this.auth.authorized$, (data, authorized) => {
+      .combineLatest(this.profileService.profile$,  (data: ProdData, profile: Profile) => {
         var groups: Group[];
         if (data) {
-          if (authorized) {
-            groups = data.preferences;
+          if (profile) {
+            groups = this.prefGroups(data.preferences, profile.preferences);
           } else {
             groups = data.general;
           }
@@ -95,6 +95,23 @@ export class ProductService {
         return product;
       })
       .filter(product => !!product) ;
+  }
+
+  private prefGroups(allGroups: Group[], prefs: any[]): Group[] {
+    var groups: Group[] = [];
+    var found: any;
+    
+    if ( allGroups && allGroups.length) {
+      allGroups.forEach(group => {
+        found = prefs.filter(pref => pref.id === group.urn)[0];
+        if (found) {
+          found.display = group.display;
+          groups.push(group);
+        }        
+      });
+    }
+    
+    return groups;
   }
 
 }
