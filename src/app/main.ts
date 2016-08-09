@@ -5,15 +5,15 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 
 import { APP_ROUTER_PROVIDERS } from './app.routes';
 import { AppComponent } from './app.component';
-import { ConfigService } from './config.service';
+//import { ConfigService } from './config.service';
+import { AuthService } from './auth.service';
+import { AuthGuard } from './auth-guard.service';
 
 bootstrap(AppComponent, [ 
   HTTP_PROVIDERS, 
   APP_ROUTER_PROVIDERS,
   { provide: LocationStrategy, useClass: HashLocationStrategy },
-  
-  //{provide: APP_BASE_HREF, useValue: 'docs/demo/'},
-  ConfigService
+  AuthService, AuthGuard
 ])
   .then(
     () => window.console.info( 'Angular finished bootstrapping your application!' ),
