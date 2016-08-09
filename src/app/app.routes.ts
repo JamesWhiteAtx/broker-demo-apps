@@ -3,6 +3,7 @@ import { ShopComponent } from './shop.component';
 import { ProfileComponent } from './profile.component';
 import { BuyComponent } from './buy.component';
 import { ReviewComponent } from './review.component';
+import { SessionComponent } from './session.component';
 import { AuthGuard } from './auth-guard.service';
 
 const ROUTES: RouterConfig = [
@@ -11,13 +12,18 @@ const ROUTES: RouterConfig = [
     component: ShopComponent
   },
   {
-    path: 'shop',
-    component: ShopComponent
-  },
-  {
     path: 'profile',
     component: ProfileComponent,
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'session',
+    component: SessionComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'shop',
+    component: ShopComponent
   },
   {
     path: 'buy/:id',

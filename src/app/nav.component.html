@@ -25,6 +25,14 @@
                 <i class="fa fa-wpforms"></i> Profile
               </a>
             </li>
+
+            <li *ngIf="authorized" routerLinkActive="active">
+              <a routerLink="/session">
+                <i class="fa fa-key"></i> Session
+              </a>
+            </li>
+
+
             <li role="separator" class="divider hidden-xs"></li>
             <li *ngIf="authorized">
               <a [href]="logoutUrl" title="Sign Out">

@@ -15,13 +15,15 @@ export interface JwtPayload {
   nonce?: string;
   scope?: string;
   sub?: string;
+
+  expires: Date;
+  issued: Date;
 }
 
 export class Jwt {
   encoded: string;
   header: JwtHeader;
   payload: JwtPayload;
-  expirationDate: Date;
   private _valid: boolean = false;
 
   constructor(encoded: string) {
@@ -37,14 +39,23 @@ export class Jwt {
     this.payload = <JwtPayload>JSON.parse(atob(parts[1]));
 
     if (typeof this.payload.exp === 'undefined') {
-      this.expirationDate = null;
+      this.payload.expires = null;
     } else if (typeof this.payload.exp === 'number') {
       var expDate = new Date(0);
       expDate.setUTCSeconds(this.payload.exp);
-      this.expirationDate = expDate;
+      this.payload.expires = expDate;
     } else {
       throw new Error('JWT has invalid expiration date');
     }
+
+    if (typeof this.payload.iat === 'undefined') {
+      this.payload.expires = null;
+    } else if (typeof this.payload.iat === 'number') {
+      var expDate = new Date(0);
+      expDate.setUTCSeconds(this.payload.iat);
+      this.payload.issued = expDate;
+    }
+
 
     this._valid = true;
   }
@@ -57,10 +68,10 @@ export class Jwt {
   }
 
   expired(): boolean {
-    if (this.expirationDate === null) {
+    if (this.payload.expires === null) {
       return false;
     }
-    return Date.now() > this.expirationDate.valueOf();
+    return Date.now() > this.payload.expires.valueOf();
   }
 
 }

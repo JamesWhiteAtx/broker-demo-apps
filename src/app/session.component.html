@@ -1,0 +1,47 @@
+<div class="container session">
+  <h4>Session</h4>
+
+  <h5>Authorization Request</h5>
+  <div class="row" *ngFor="let seg of authSegments">
+    <div class="col-sm-3">{{seg.name}}</div>
+    <div class="col-sm-9">{{seg.value}}</div>
+  </div>
+
+  <h5>Authorization Response</h5>
+  <div class="row" *ngFor="let seg of response">
+    <div class="col-sm-3">{{seg.name}}</div>
+    <div class="col-sm-9">{{seg.value}}</div>
+  </div>
+  <hr/>
+  
+  <div class="row">
+    <div class="col-sm-3">
+      <label>Access Token</label>
+      <div class="pull-right">
+        <a href="#" (click)="toggleAcc()" title="toggle decode"> 
+          <i class="fa" [class.fa-toggle-off]="!accDecoded" [class.fa-toggle-on]="accDecoded"></i>
+        </a>        
+      </div>
+    </div>
+    <div class="col-sm-9">
+      <demo-jwt [jwt]="state.bearerToken" [decoded]="accDecoded"></demo-jwt>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-sm-3">
+      <label>Id Token</label>
+      <div class="pull-right">
+        <a href="#" (click)="toggleId()" title="toggle decode"> 
+          <i class="fa" [class.fa-toggle-off]="!idDecoded" [class.fa-toggle-on]="idDecoded"></i>
+        </a>        
+      </div>
+    </div>
+    <div class="col-sm-9">
+      <demo-jwt [jwt]="state.idToken" [decoded]="idDecoded"></demo-jwt>
+    </div>
+  </div>
+    
+</div>
+
+  

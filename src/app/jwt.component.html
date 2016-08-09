@@ -1,0 +1,11 @@
+<div *ngIf="decoded">
+  <div *ngFor="let claim of claims">
+    <label>{{claim.name}}</label> 
+    <span>{{claim.value}}</span>
+  </div>
+</div>
+
+<div *ngIf="! decoded">
+  {{jwt.encoded}}
+</div>
+

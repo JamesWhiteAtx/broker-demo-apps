@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/distinctUntilChanged';
-import { Jwt } from './jwt'
+import { Jwt } from './jwt';
 
 interface UrlParms {
   [key: string]: string;
@@ -26,22 +26,23 @@ export interface AuthParams {
   token_type?: string;
   error?: string;
   error_description?: string;
+  expiresTime?: string;
 } 
 
 export class AuthState {
   encoded: string;
+  respParams: AuthParams;
   bearerToken: Jwt;
   idToken: Jwt;
 
   private _authorized: boolean;
 
   constructor(encoded?: string) {
-    var params: AuthParams;
     if (encoded) {
       this.encoded = encoded;
-      params = <AuthParams>parseParams(atob(decodeURIComponent(this.encoded)));
-      this.bearerToken = new Jwt(params.access_token);
-      this.idToken = new Jwt(params.id_token);
+      this.respParams = <AuthParams>parseParams(atob(decodeURIComponent(this.encoded)));
+      this.bearerToken = new Jwt(this.respParams.access_token);
+      this.idToken = new Jwt(this.respParams.id_token);
       
       this._authorized = this.bearerToken.valid;
     } else {
