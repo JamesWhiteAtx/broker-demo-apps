@@ -26,7 +26,6 @@ export interface AuthParams {
   token_type?: string;
   error?: string;
   error_description?: string;
-  expiresTime?: string;
 } 
 
 export class AuthState {

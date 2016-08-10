@@ -1,11 +1,11 @@
-<div *ngIf="decoded">
-  <div *ngFor="let claim of claims">
-    <label>{{claim.name}}</label> 
-    <span>{{claim.value}}</span>
-  </div>
-</div>
+<table class="table table-hover table-condensed" *ngIf="decoded">
+  <tr class="row" *ngFor="let claim of claims">
+    <td class="col-sm-3"><label>{{claim.name}}</label></td> 
+    <td class="col-sm-9">{{claim.value}}</td>
+  </tr>
+</table>
 
-<div *ngIf="! decoded">
+<pre *ngIf="! decoded">
   {{jwt.encoded}}
-</div>
+</pre>
 

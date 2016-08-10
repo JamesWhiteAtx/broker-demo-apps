@@ -1,24 +1,36 @@
 <div class="container session">
   <h4>Session</h4>
 
-  <h5>Authorization Request</h5>
-  <div class="row" *ngFor="let seg of authSegments">
-    <div class="col-sm-3">{{seg.name}}</div>
+  <h4>Authorization Request</h4>
+  <div class="row" *ngFor="let seg of reqSegs">
+    <div class="col-sm-3"><label>{{seg.name}}</label></div>
     <div class="col-sm-9">{{seg.value}}</div>
   </div>
 
-  <h5>Authorization Response</h5>
-  <div class="row" *ngFor="let seg of response">
-    <div class="col-sm-3">{{seg.name}}</div>
-    <div class="col-sm-9">{{seg.value}}</div>
+  <h4>Authorization Response</h4>
+  <div class="row">
+    <div class="col-sm-3"><label>Token Type</label></div>
+    <div class="col-sm-9">{{state?.respParams?.token_type}}</div>
   </div>
-  <hr/>
-  
+  <div class="row">
+    <div class="col-sm-3"><label>Duration</label></div>
+    <div class="col-sm-9">{{duration}}</div>
+  </div>
+  <div class="row">
+    <div class="col-sm-3"><label>Scope</label></div>
+    <div class="col-sm-9">{{state?.respParams?.scope}}</div>
+  </div>
+  <div class="row">
+    <div class="col-sm-3"><label>State</label></div>
+    <div class="col-sm-9">{{state?.respParams?.state}}</div>
+  </div>
+
   <div class="row">
     <div class="col-sm-3">
       <label>Access Token</label>
       <div class="pull-right">
-        <a href="#" (click)="toggleAcc()" title="toggle decode"> 
+        <a href="#" (click)="toggleAcc()" 
+          [attr.title]="accDecoded ? 'Display token string' : 'Display token values'"> 
           <i class="fa" [class.fa-toggle-off]="!accDecoded" [class.fa-toggle-on]="accDecoded"></i>
         </a>        
       </div>
@@ -32,7 +44,8 @@
     <div class="col-sm-3">
       <label>Id Token</label>
       <div class="pull-right">
-        <a href="#" (click)="toggleId()" title="toggle decode"> 
+        <a href="#" (click)="toggleId()" 
+          [attr.title]="accDecoded ? 'Display token string' : 'Display token values'"> 
           <i class="fa" [class.fa-toggle-off]="!idDecoded" [class.fa-toggle-on]="idDecoded"></i>
         </a>        
       </div>
@@ -40,6 +53,11 @@
     <div class="col-sm-9">
       <demo-jwt [jwt]="state.idToken" [decoded]="idDecoded"></demo-jwt>
     </div>
+  </div>
+
+  <div class="row" *ngFor="let seg of respSegs">
+    <div class="col-sm-3"><label>{{seg.name}}</label></div>
+    <div class="col-sm-9">{{seg.value}}</div>
   </div>
     
 </div>
