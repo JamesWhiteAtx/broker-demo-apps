@@ -28,6 +28,9 @@ export class BuyComponent implements OnInit {
         this.cart.getById(id)
           .subscribe(item => {
             this.item = item;
+            if (this.item.qty === 0) {
+              this.item.qty = 1;
+            }
           });
 
       } else {

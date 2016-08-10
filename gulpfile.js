@@ -60,6 +60,7 @@ function configure(dist, proxy, base) {
       script: sourcePath + 'js/**/*.js',
       img: sourcePath + 'img/**/*.*',
       config: sourcePath + 'config/**/*.*',
+      dsconfig: sourcePath + 'setup.dsconfig',
       vendor: {
         ubid: sourcePath + vendorPath + ubidPath + '**/*.*',
         bootstrap: sourcePath + vendorPath + bootPath + 'bootbase.scss',
@@ -328,6 +329,15 @@ function ubidSript() {
 
 gulp.task('script:ubid', ubidSript);
 
+// DSCONFIG
+function dsconfig() {
+  return gulp
+    .src(cfg.src.dsconfig)
+    .pipe(gulp.dest(cfg.dist.path));
+}
+
+gulp.task('dsconfig', dsconfig);
+
 // BUNDELS
 
 function makeNgPkgNames() {
@@ -351,8 +361,6 @@ function makeBundleSysJsCfg() {
   cfg.src.vendor.ng.pkgs.forEach(function(pkgName) {
     packages[ngPath + pkgName] = { main: 'bundles/' + pkgName + '.umd.js', defaultExtension: 'js' };
   });
-
-////////////////
 
   map.app = sourcePath + appPkg;
   map[tsPkg] = npmPath + 'typescript/lib';
@@ -382,8 +390,6 @@ function makeBundleSysJsCfg() {
       "main": "plugin.js",
       "defaultExtension": "js"
     };
-
-////////////////
 
   var sysCfg = {
     'paths': { [vendorPath + '*']: npmPath + '*' },
@@ -690,11 +696,11 @@ gulp.task('bundleTest', function(cb) {
 
 });
 
-function
- test(cb) {
-   cb();
-}
+gulp.task('release', gulp.series(
+    clean,
+    build,
+    dsconfig
+));
 
-gulp.task('test', test);
-
-    // /Users/jameswhite/Source/deploy/ib2/docs/demo/';
+// /Users/jameswhite/Source/deploy/ib2/docs/demo/';
+// gulp serve:reload --dist /Users/jameswhite/Source/deploy/ib2/docs/demo  --base docs/demo
