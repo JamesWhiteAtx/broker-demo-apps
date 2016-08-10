@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Branding } from './branding.service';
-import { Brand } from './brand';
+import { Branding, Brand } from './branding.service';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
 import { Profile, ProfileService } from './profile.service';

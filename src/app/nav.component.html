@@ -35,7 +35,7 @@
 
             <li role="separator" class="divider hidden-xs"></li>
             <li *ngIf="authorized">
-              <a [href]="logoutUrl" title="Sign Out">
+              <a href="#" title="Sign Out" (click)="auth?.logout()">
                 <i class="fa fa-sign-out"></i> Sign Out
               </a>
             </li>
@@ -44,7 +44,7 @@
         </li>
 
         <li *ngIf="!authorized">
-          <a [href]="authUrl" title="Sign In">
+          <a href="#" title="Sign In" (click)="auth?.requestAuth()">
             <i class="fa fa-user"></i> Sign In
           </a>
         </li>
@@ -70,13 +70,5 @@
       </ul>
     </div>
   </div>
-  <!--<p>
-    <button (click)="authToggle()">Auth toggle</button>
-    <span>Authorized:</span> <span>{{auth.authorized$ | async}}</span>/
-    <span *ngIf="(auth.authorized$ | async)">Yes</span>
-    <span *ngIf="!(auth.authorized$ | async)">No</span>
-    --<button (click)="auth.testProfile()">profile</button>
-    <span>un:{{profile?.userName}}</span>
-  </p>-->
   
 </nav>

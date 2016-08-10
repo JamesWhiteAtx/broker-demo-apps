@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { Jwt } from './jwt';
+import { ConfigService } from './config.service';
 
 interface UrlParms {
   [key: string]: string;
@@ -62,6 +63,8 @@ export class AuthState {
 } 
 
 const AUTH_VALUES_KEY = 'demo_auth_values';
+const AUTH_STATE_KEY = 'demo_auth_state';
+const AUTH_LAST_URL = 'demo_last_url';
 
 @Injectable()
 export class AuthService {
@@ -71,22 +74,28 @@ export class AuthService {
   private _authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public authorized$: Observable<boolean> = this._authorized.asObservable().distinctUntilChanged();
 
-  constructor() {
+  constructor(private config: ConfigService) {
     this.init();
   }
   
-  deAuthorize() {
-    this.decodeAuth(null);
-  }
-
   private init() {
     this.state$ 
       .subscribe(state => {
         var authorized = !!state && !!state.authorized;
+        
+        if (authorized) {
+          var stateToken = window.sessionStorage.getItem(AUTH_STATE_KEY);
+          authorized = (state.respParams.state === stateToken);
+        }
+
         this._authorized.next(authorized);
       });
 
     this.decodeAuth(this.loadEncodedValues());
+  }
+
+  lastAuthUtl() {
+    return window.sessionStorage.getItem(AUTH_LAST_URL);
   }
 
   private decodeAuth(encoded) {
@@ -120,5 +129,37 @@ export class AuthService {
     return window.sessionStorage.getItem(AUTH_VALUES_KEY);
   }
 
+  private requestAuth() {
+    var stateToken = this.makeStateToken();
+    
+    this.config.configuration$.subscribe(cfg => {
+      var url = cfg.getAuthorizeUrl(stateToken);
+      window.sessionStorage.setItem(AUTH_STATE_KEY, stateToken);
+      window.sessionStorage.setItem(AUTH_LAST_URL, url);
+      window.location.assign(url);
+    })
+    .unsubscribe();
+    return false;
+  }
+
+  private logout() {
+    this.config.configuration$.subscribe(cfg => {
+      var stateToken = window.sessionStorage.getItem(AUTH_STATE_KEY);
+      var url = cfg.getLogoutUrl(stateToken);
+      window.location.assign(url);
+    })
+    .unsubscribe();
+    return false;
+  }
+
+  private makeStateToken(): string {
+    var rand = Math.floor(Math.random() * (999999 - 0 + 1)) + 0;
+    var stateToken = rand.toString();
+    return stateToken;
+  }
+
+  // deAuthorize() {
+  //   this.decodeAuth(null);
+  // }
 }          
     

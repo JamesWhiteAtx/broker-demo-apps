@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ConfigService } from './config.service';
-import { Configuration } from './configuration';
 import { AuthService, AuthState } from './auth.service';
 import { JwtComponent } from './jwt.component'
 
@@ -10,6 +8,7 @@ interface NameValue {name: string, value?: string}
 @Component({
   selector: 'demo-session',
   templateUrl: 'app/session.component.html',
+  styles: ['.session .row {margin-bottom: 10px;}', '.session .title {margin-top: 20px;}'],
   directives: [JwtComponent]
 })
 export class SessionComponent implements OnInit {
@@ -20,15 +19,14 @@ export class SessionComponent implements OnInit {
   private idDecoded: boolean = true;
   private duration: string;  
   
-  constructor(
-    private config: ConfigService,
-    private auth: AuthService) {}
+  constructor(private auth: AuthService) {}
 
   ngOnInit() {    
 
-    this.config.configuration$.subscribe(configuration => {
+    this.auth.state$.subscribe(state => {
+      this.state = state;
 
-      var src = 'endpoint=' + configuration.authUrl
+      var src = 'endpoint=' + this.auth.lastAuthUtl();
       this.reqSegs = src.split(/[?&]/g)
         .map(seg => {
           var arr = seg.split('=');
@@ -37,10 +35,7 @@ export class SessionComponent implements OnInit {
             value: arr[1] ? decodeURIComponent(arr[1]) : null
           };
         });
-    });
 
-    this.auth.state$.subscribe(state => {
-      this.state = state;
 
       this.duration = this.secondsToHms(state.respParams.expires_in);
 

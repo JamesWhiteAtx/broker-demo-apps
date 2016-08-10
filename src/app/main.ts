@@ -1,11 +1,9 @@
 import { bootstrap }    from '@angular/platform-browser-dynamic';
 import { HTTP_PROVIDERS } from '@angular/http';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
-//import { APP_BASE_HREF } from '@angular/common';
-
 import { APP_ROUTER_PROVIDERS } from './app.routes';
 import { AppComponent } from './app.component';
-//import { ConfigService } from './config.service';
+import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth-guard.service';
 
@@ -13,7 +11,7 @@ bootstrap(AppComponent, [
   HTTP_PROVIDERS, 
   APP_ROUTER_PROVIDERS,
   { provide: LocationStrategy, useClass: HashLocationStrategy },
-  AuthService, AuthGuard
+  ConfigService, AuthService, AuthGuard
 ])
   .then(
     () => window.console.info( 'Angular finished bootstrapping your application!' ),
