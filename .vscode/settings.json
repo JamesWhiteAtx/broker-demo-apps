@@ -4,6 +4,7 @@
   "search.exclude": {
     "**/node_modules": true,
     "**/.idea": true,
-    "**/plugin-typescript": true
+    "**/plugin-typescript": true,
+    "**/dist": true
   }  
 }

@@ -38,11 +38,11 @@ export class NavComponent implements OnInit {
         }
       });
 
-    this.config.configuration$
-      .subscribe(cfg => {
-        this.authUrl = cfg.authUrl;
-        this.logoutUrl = cfg.logoutUrl;
-      });
+    // this.config.configuration$
+    //   .subscribe(cfg => {
+    //     this.authUrl = cfg.authUrl;
+    //     this.logoutUrl = cfg.logoutUrl;
+    //   });
 
     this.auth.authorized$
       .subscribe(authorized => {
@@ -54,10 +54,6 @@ export class NavComponent implements OnInit {
         this.profile = profile;
       });
 
-  }
-
-  authToggle() {
-    this.auth.deAuthorize();
   }
   
 }
