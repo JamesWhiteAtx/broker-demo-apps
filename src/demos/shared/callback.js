@@ -3,16 +3,20 @@ var ubid;
     ubid.redirect = redirect;
 
     function redirect(loc) {
-        if (!loc) {
-            return;
-        }
-        var origin = loc.origin;
-        var path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
-        path = getStatePage(path, loc.hash || loc.search);
-        var search = encodeURIComponent(btoa(loc.search || ''));
-        var hash = encodeURIComponent(btoa(loc.hash || ''));
-        loc.replace(origin + path + '?csearch=' + search + '&chash=' + hash);
+
+console.log('redirect');
+return false;        
     }
+    //     if (!loc) {
+    //         return;
+    //     }
+    //     var origin = loc.origin;
+    //     var path = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+    //     path = getStatePage(path, loc.hash || loc.search);
+    //     var search = encodeURIComponent(btoa(loc.search || ''));
+    //     var hash = encodeURIComponent(btoa(loc.hash || ''));
+    //     loc.replace(origin + path + '?csearch=' + search + '&chash=' + hash);
+    // }
 
     function getStatePage(path, qStr) {
         if (!qStr) {

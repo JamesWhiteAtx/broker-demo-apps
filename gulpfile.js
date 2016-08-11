@@ -9,13 +9,17 @@ const pkg = require('./package.json');
 const through = require('through2');
 const $ = require('gulp-load-plugins')();
 
+const commonPath = 'common/';
 const npmPath = 'node_modules/';
-const appPkg = 'app';
 const sourcePath = 'src/';
+const demosPkg = 'demos';
+const demosPath = demosPkg + '/';
+const htmlPath = 'html/';
+const appPkg = 'app';
 const appPath = appPkg + '/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
-const ubidPath = 'ubid/';
+const pingPath = 'ping/';
 const bootPath = 'bootstrap/';
 const ngPkg = '@angular';
 const ngPath = ngPkg + '/';
@@ -54,15 +58,18 @@ function configure(dist, proxy, base) {
     proxyTarget: proxyTarget,
     basePath: basePath,
     src: {
-      html: sourcePath + '**/*.html',
-      app: sourcePath + appPath + '**/*.*',
+      html: sourcePath + htmlPath + '*.html',
+      //app: sourcePath + appPath + '**/*.*',
       scss: sourcePath + stylePath + '**/*.scss',
       script: sourcePath + 'js/**/*.js',
       img: sourcePath + 'img/**/*.*',
       config: sourcePath + 'config/**/*.*',
       dsconfig: sourcePath + 'setup.dsconfig',
+      demos: {
+        html: sourcePath + demosPath + '**/*.html',
+        app: sourcePath + demosPath + '**/!(*.html)'
+      },
       vendor: {
-        ubid: sourcePath + vendorPath + ubidPath + '**/*.*',
         bootstrap: sourcePath + vendorPath + bootPath + 'bootbase.scss',
         awesome: npmPath + 'font-awesome/scss/font-awesome.scss',
         fonts: [
@@ -82,7 +89,7 @@ function configure(dist, proxy, base) {
         sysjs: {
           npm: npmPath + 'systemjs/dist/system.src.js',
           plugints: npmPath + 'plugin-typescript/lib/*.js',
-          load: sourcePath + vendorPath + sysjsPath + '*.js'
+          js: sourcePath + vendorPath + sysjsPath + '*.js'
         }, 
         ng: {
           root: npmPath + ngPath,
@@ -102,17 +109,28 @@ function configure(dist, proxy, base) {
       path: distPath,
       reload: distPath + '**/*.{html,htm,css,js,ts,json}',
       clean: distPath + '**/*',
+      demo: distPath + demosPath,
+      common: {
+        vendor: distPath + commonPath,
+        ng: distPath + commonPath + ngPath,
+        sysjs: distPath + commonPath + sysjsPath,
+        plugints: distPath + commonPath + sysjsPath + plugintsPath,
+        ts: distPath + commonPath + tsPath,
+        style: distPath + commonPath + stylePath,
+        font: distPath + commonPath + 'fonts/',
+        img: distPath + commonPath + 'img/',
+      },
       app: distPath + 'app/',
-      font: distPath + 'fonts/',
-      img: distPath + 'img/',
-      style: distPath + stylePath,
+      // font: distPath + 'fonts/',
+      // img: distPath + 'img/',
+      // style: distPath + stylePath,
       config: distPath + configPath,
-      vendor: distPath + vendorPath,
-      ubid: distPath + vendorPath + ubidPath,
-      ng: distPath + vendorPath + ngPath,
-      ts: distPath + vendorPath + tsPath,
-      sysjs: distPath + vendorPath + sysjsPath,
-      plugints: distPath + vendorPath + sysjsPath + plugintsPath, 
+      // vendor: distPath + vendorPath,
+      // ping: distPath + vendorPath + pingPath,
+      // ng: distPath + vendorPath + ngPath,
+      // ts: distPath + vendorPath + tsPath,
+      // sysjs: distPath + vendorPath + sysjsPath,
+      // plugints: distPath + vendorPath + sysjsPath + plugintsPath, 
       styles: {
         app: 'app.css',
         vendor: 'vendor.css'
@@ -147,7 +165,7 @@ function vendorStyle() {
             .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
             .pipe($.rename('bootstrap.css'))
         )
-        .pipe(gulp.dest(cfg.dist.style));
+        .pipe(gulp.dest(cfg.dist.common.style));
 }
 
 gulp.task('style:vendor', vendorStyle);
@@ -155,7 +173,7 @@ gulp.task('style:vendor', vendorStyle);
 function vendorFont() {
 	return gulp
         .src(cfg.src.vendor.fonts)
-        .pipe(gulp.dest(cfg.dist.font));
+        .pipe(gulp.dest(cfg.dist.common.font));
 }
 
 gulp.task('font:vendor', vendorFont);
@@ -163,7 +181,7 @@ gulp.task('font:vendor', vendorFont);
 function appImg() {
 	return gulp
         .src(cfg.src.img)
-        .pipe(gulp.dest(cfg.dist.img));
+        .pipe(gulp.dest(cfg.dist.common.img));
 }
 
 gulp.task('img:app', appImg);
@@ -174,7 +192,7 @@ function appStyle() {
         .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
         .pipe($.concat(cfg.dist.styles.app))
         .pipe(typeHeader())
-        .pipe(gulp.dest(cfg.dist.style));
+        .pipe(gulp.dest(cfg.dist.common.style));
 }
 
 gulp.task('style:app', appStyle);
@@ -185,17 +203,8 @@ var style = gulp.parallel(vendorStyle, vendorFont, appImg, appStyle);
 
 gulp.task('style', style);
 
-// CONFIG
-function appConfig() {
-  return gulp
-    .src(cfg.src.config)
-    .pipe(gulp.dest(cfg.dist.config));
-}
-
-gulp.task('config:app', appConfig);
-
 cfg.copyMsg = 
-` * Copyright (c) ${new Date().getFullYear()} UnboundID Corp.
+` * Copyright (c) ${new Date().getFullYear()} Ping.
  * All Rights Reserved. 
  * ${pkg.name} - ${pkg.description}
  * @version ${pkg.version}
@@ -229,22 +238,13 @@ function typeHeader() {
   return through.obj(tansformStream);
  }
 
-// ANGULAR APP
-function ngApp() {
-  return gulp
-    .src(cfg.src.app)
-    .pipe(typeHeader())
-    .pipe(gulp.dest(cfg.dist.app));
-  }
-
-gulp.task('app:ng', ngApp);
 
 // NPM SCRIPTS
 
 function npmScript() {
   return gulp
     .src(cfg.src.vendor.npm)
-    .pipe(gulp.dest(cfg.dist.vendor));
+    .pipe(gulp.dest(cfg.dist.common.vendor));
 }
 
 gulp.task('script:npm', npmScript);
@@ -257,7 +257,7 @@ function ngScript() {
   });
   return gulp
     .src(ngPkgs)
-    .pipe(gulp.dest(cfg.dist.ng)); 
+    .pipe(gulp.dest(cfg.dist.common.ng)); 
 }
 
 gulp.task('script:ng', ngScript);
@@ -267,69 +267,104 @@ gulp.task('script:ng', ngScript);
 function sysjsNpm() {
   return gulp
     .src(cfg.src.vendor.sysjs.npm)
-    .pipe(gulp.dest(cfg.dist.sysjs));
+    .pipe(gulp.dest(cfg.dist.common.sysjs));
 }
 
 gulp.task('script:sysjs:npm', sysjsNpm);
 
 // SYSTEMJS TYPESCRIPT PLUGIN SCRIPT
 
-function sysjsTs() {
+function sysjsPlug() {
   return gulp
     .src(cfg.src.vendor.sysjs.plugints)
-    .pipe(gulp.dest(cfg.dist.plugints));
+    .pipe(gulp.dest(cfg.dist.common.plugints));
 }
 
-gulp.task('script:sysjs:ts', sysjsTs);
+gulp.task('script:sysjs:plug', sysjsPlug);
 
-// SYSTEMJS LOAD SCRIPTS
+// SYSTEMJS JS SCRIPTS
 
-function sysjsLoad() {
+function sysjsJs() {
   return gulp
-    .src(cfg.src.vendor.sysjs.load)
-    .pipe(gulp.dest(cfg.dist.sysjs));
+    .src(cfg.src.vendor.sysjs.js)
+    .pipe(gulp.dest(cfg.dist.common.sysjs));
 }
 
-gulp.task('script:sysjs:load', sysjsLoad);
+gulp.task('script:sysjs:js', sysjsJs);
 
 //CONSOLIDATED SYSTEMJS TASKS
 
-var sysjsScript = gulp.parallel(sysjsNpm, sysjsTs, sysjsLoad);
+var sysjsScript = gulp.parallel(sysjsNpm, sysjsPlug, sysjsJs);
 
-// HTML
+// APP HTML
+
 function appHtml() {
   return gulp
-    .src(cfg.src.html)
-    .pipe($.replace(/<base [^>]*href=\"(.*?)\">/ig, 
-      '<base href="' + cfg.basePath + '">'))
+    .src(cfg.src.demos.html)
     .pipe(typeHeader())
     .pipe(gulp.dest(cfg.dist.path));
 }
 
 gulp.task('html:app', appHtml);
 
+function replaceBaseHref(contents, file) {
+  var rgx = /<base [^>]*href=\"(.*?)\">/ig;
+  if (contents.search(rgx) === -1) {
+    return contents;
+  } else {
+    var fromPath = path.normalize(__dirname + '/' + sourcePath);
+    var relativePath = path.relative(fromPath , file.dirname);
+    var baseHref = path.normalize(cfg.basePath + relativePath + '/');
+    return contents.replace(rgx, 
+      '<base href="' + cfg.basePath + '">')
+  }
+}
+
+function appIndex() {
+  var apps = ['main/', 'cart/', 'social/'];
+  var tasks = [];
+
+  apps.forEach(function(appPath) {
+    tasks.push(
+      function() {
+        console.log('appPath', appPath);
+        return gulp
+            .src(cfg.src.html)
+            .pipe($.insert.transform(replaceBaseHref))
+            .pipe(typeHeader())
+            .pipe(gulp.dest(cfg.dist.path + appPath));
+      }
+    );
+  });
+  
+  return gulp.parallel(tasks);
+}
+
+gulp.task('index:app', appIndex());
+
+// ANGULAR APP
+
+function appNg() {
+  return gulp
+    .src(cfg.src.demos.app)
+    .pipe(typeHeader())
+    .pipe(gulp.dest(cfg.dist.path));
+  }
+
+gulp.task('ng:app', appNg);
+
 // TYPESCRIPT
 
 function tsScript() {
   return gulp
     .src(cfg.src.vendor.ts.npm)
-    .pipe(gulp.dest(cfg.dist.ts));
+    .pipe(gulp.dest(cfg.dist.common.ts));
 }
 
 gulp.task('script:ts:npm', tsScript);
 
-// UBID
-
-function ubidSript() {
-  return gulp
-    .src(cfg.src.vendor.ubid)
-    .pipe(typeHeader())
-    .pipe(gulp.dest(cfg.dist.ubid));
-}
-
-gulp.task('script:ubid', ubidSript);
-
 // DSCONFIG
+
 function dsconfig() {
   return gulp
     .src(cfg.src.dsconfig)
@@ -507,12 +542,11 @@ var build = gulp.parallel(
   ngScript,
   sysjsScript,
   tsScript,
-  ubidSript,
-  appHtml, 
   style, 
-  ngApp, 
-  appConfig, 
-  libBundles); 
+  appHtml, 
+  appNg
+  //,libBundles
+  ); 
 
 gulp.task('build', build);
 
@@ -546,26 +580,26 @@ function buildWatch() {
   
   gulp.watch(cfg.src.html, {delay: cfg.src.delay}, appHtml);
 
-  gulp.watch(cfg.src.vendor.ubid, {delay: cfg.src.delay}, ubidSript);
+  // gulp.watch(cfg.src.vendor.ping, {delay: cfg.src.delay}, pingSript);
 
-  gulp.watch(cfg.src.config, {delay: cfg.src.delay}, appConfig);
+  // gulp.watch(cfg.src.config, {delay: cfg.src.delay}, appConfig);
   
-  gulp.watch(cfg.src.vendor.load, {delay: cfg.src.delay}, sysjsLoad);
+  gulp.watch(cfg.src.vendor.load, {delay: cfg.src.delay}, sysjsJs);
 
-  gulp.watch(cfg.src.app, {delay: cfg.src.delay}, ngApp);
+  gulp.watch(cfg.src.app, {delay: cfg.src.delay}, appNg);
 }
 
 gulp.task('watch:build', buildWatch);
 
-// function distWatch(cb) {
-//   gulp.watch(cfg.dist.reload, {delay: cfg.dist.delay}, 
-//       function reload(cb) {
-//         browserSync.reload();
-//         cb();
-//     });  
-// }
-
-// gulp.task('watch:dist', distWatch);
+/* function distWatch(cb) {
+  gulp.watch(cfg.dist.reload, {delay: cfg.dist.delay}, 
+      function reload(cb) {
+        browserSync.reload();
+        cb();
+    });  
+}
+gulp.task('watch:dist', distWatch);
+*/
 
 // a timeout variable
 var reloadTimer = null;
@@ -620,81 +654,6 @@ gulp.task('serve:reload', gulp.series(
     settings,
     gulp.parallel(buildWatch, reloadWatch)
 ));
-
-gulp.task('bundleTest', function(cb) {
- 
-  function getSubTrace(builder, allExpr, subExpr) {
-    var noSubExpr, allTrace;
-
-    noSubExpr = '(' + allExpr + ') - ['+subExpr+'/**/*]';
-    
-    return builder.trace(allExpr)
-    .then(function (trace) {
-      allTrace = trace;
-    })
-    .then(function (trace) {
-      return builder.trace(noSubExpr);
-    })
-    .then(function (noSubTrace) {
-      return builder.subtractTrees(allTrace, noSubTrace);
-    })
-  }
-  
-  var sysCfg = makeBundleSysJsCfg();
-  var builder = new Builder();
-  builder.config(sysCfg);
-  
-  getSubTrace(builder, appPkg, rxjsPkg)
-  .then(function (trace) {
-    return builder.bundle(trace)
-  })
-  .then(function(justRxOutput) {
-    console.log('just Rx', justRxOutput.modules.length);
-    console.log('just Rx', justRxOutput.modules);
-    return justRxOutput.modules;
-  })
-
-  // .then(function(allAppOutput) {
-  //   console.log('all app', allAppOutput.modules.length);
-  //   console.log('all app', allAppOutput.modules);
-  //   return allAppOutput.modules;
-  // })
-
-  //   return builder.bundle(allTrace)
-
-
-  ;
-
-  // builder.trace(appPkg)
-  // .then(function (trace) {
-  //   return builder.bundle(trace)
-  // })
-  // .then(function(output) {
-  //   console.log('all app', output.modules.length);
-  //   return output.modules;
-  // })
-  // ;
-
-  cb();
-  // .then(function (trace) {
-  //   justNgTrace = trace;
-  //   return writePkgBundle(builder, ngPkg, justNgTrace);
-  // })
-  // .then(function (justNgTrace) {
-  //   return builder.subtractTrees(allNgTrace, justNgTrace);
-  // })
-  // .then(function (trace) {
-  //   ngRxTrace = trace;
-  //   return writePkgBundle(builder, rxjsPkg, ngRxTrace);
-  // })
-  // .then(function () {
-  //   var sysJsCfg = getDistSysJsCfg();
-  //   return fs.writeFile(cfg.dist.sysjs + 'config.json', 
-  //     JSON.stringify(sysJsCfg, null, 2) , 'utf-8');
-  // })
-  //;
-
-});
 
 gulp.task('release', gulp.series(
     clean,
