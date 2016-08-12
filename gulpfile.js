@@ -21,6 +21,7 @@ const sharedPath = 'shared/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
 const pingPath = 'ping/';
+const imgPath = 'img/';
 const bootPath = 'bootstrap/';
 const ngPkg = '@angular';
 const ngPath = ngPkg + '/';
@@ -58,13 +59,14 @@ function configure(dist, proxy, base) {
   cfg = {
     proxyTarget: proxyTarget,
     basePath: basePath,
+    apps: ['main', 'cart', 'social'],
     src: {
       //html: sourcePath + htmlPath + '*.html',
       common: sourcePath + commonPath,
       //app: sourcePath + appPath + '**/*.*',
       scss: sourcePath + stylePath + '**/*.scss',
       script: sourcePath + 'js/**/*.js',
-      img: sourcePath + 'img/**/*.*',
+      img: sourcePath +  imgPath + '**/*.*',
       config: sourcePath + 'config/**/*.*',
       dsconfig: sourcePath + 'setup.dsconfig',
       demos: {
@@ -120,7 +122,7 @@ function configure(dist, proxy, base) {
         ts: distPath + vendorPath + tsPath,
         style: distPath + vendorPath + stylePath,
         font: distPath + vendorPath + 'fonts/',
-        img: distPath + vendorPath + 'img/',
+        img: distPath + sharedPath + 'img/',
       },
       app: distPath + 'app/',
       // font: distPath + 'fonts/',
@@ -312,9 +314,7 @@ gulp.task('html:app', appHtml);
 // INDEX AND CALLBACK
 
 function appCommon() {
-  var apps = ['main', 'cart', 'social'];
   var tasks = [];
-  var rgx = /<base [^>]*href=\"(.*?)\">/ig;
 
   var styles = ['bootstrap.css','font-awesome.css','app.css'].map(function(style) {
       return '../' + vendorPath + stylePath +  style;
@@ -326,16 +326,30 @@ function appCommon() {
     .concat('../' + vendorPath + sysjsPath +  path.basename(cfg.src.vendor.sysjs.npm));
   var sysJsScript = '../' + vendorPath + sysjsPath + 'load.app.js'
   var callBackScript = '../' + sharedPath + 'callback.js';
+  var images = '../' + sharedPath + imgPath;
+  var shortTag = '<link href= "' + images + 'unboundid-u-transparent-16x16.ico" rel="shortcut icon">'; 
 
-  apps.forEach(function(app) {
+  cfg.apps.forEach(function (app) {
+    var appName = app.charAt(0).toUpperCase() + app.substr(1).toLowerCase();
+    var clientId = '@broker-demo-' + app + '@';
+    var appPath = cfg.basePath + app;
+    var callBackUrl = appPath + '/callback.html';
+    var titleTag = '<title>Ping Data Broker ' + appName + ' Demo</title>';
+    var baseTag = '<base href="' + appPath + '/">';
+
+    // Index
     tasks.push(
-      function() {
-        function replaceBaseHref(contents, file) {
-          return contents.replace(rgx, 
-              '<base href="' + cfg.basePath + app + '/">');
-        }
+      function index() {
+        // var rgxBaseTag = /<base [^>]*href=\"(.*?)\">/ig;
+        // function replaceBaseHref(contents, file) {
+        //   return contents.replace(rgxBaseTag, 
+        //       '<base href="' + appPath + '/">');
+        // }
         var demoTag = '<' + app + '-app>Loading...</' + app + '-app>';
         var replaceCfg = {
+            'title': titleTag,
+            'shortcut': shortTag,
+            'base': baseTag,
             'css': styles,
             'js': scripts,
             'sysjs': sysJsScript,
@@ -343,45 +357,81 @@ function appCommon() {
         };
 
         return gulp
-            .src(cfg.src.common + 'index.html')
-            .pipe(typeHeader())
-            .pipe($.insert.transform(replaceBaseHref))
-            .pipe($.htmlReplace(replaceCfg))
-            .pipe(gulp.dest(cfg.dist.path + app));
+          .src(cfg.src.common + 'index.html')
+          .pipe(typeHeader())
+          //.pipe($.insert.transform(replaceBaseHref))
+          .pipe($.htmlReplace(replaceCfg))
+          .pipe(gulp.dest(cfg.dist.path + app));
       }
     );
 
+    // Callback
     tasks.push(
-      function() {
+      function callback() {
+        var replaceCfg = {
+          'title': titleTag,
+          'shortcut': shortTag,
+          'js': callBackScript 
+        };
         return gulp
-            .src(cfg.src.common + 'callback.html')
-            .pipe(typeHeader())
-            .pipe($.htmlReplace({'js': callBackScript }))
-            .pipe(gulp.dest(cfg.dist.path + app));        
+          .src(cfg.src.common + 'callback.html')
+          .pipe(typeHeader())
+          .pipe($.htmlReplace(replaceCfg))
+          .pipe(gulp.dest(cfg.dist.path + app));        
       }
     );
+
+    // json
+    tasks.push(
+      function json() {
+        var rgxClientId = /"CLIENT_ID".*",/ig;
+        var rgxCallback = /"CLIENT_REDIRECT_URL".*",/ig;
+        var rgxLogo = /"logo".*"/ig;
+
+        function replaceVals(contents, file) {
+          contents = contents.replace(rgxLogo, 
+              '"logo": "' + images + 'logo.svg"');
+          contents = contents.replace(rgxClientId, 
+              '"CLIENT_ID": "' + clientId + '",');
+          return contents.replace(rgxCallback, 
+              '"CLIENT_REDIRECT_URL": "' + callBackUrl + '",');
+        }
+
+        return gulp
+          .src(cfg.src.common + '*.json')
+          .pipe($.insert.transform(replaceVals))
+          .pipe(gulp.dest(cfg.dist.path + app));    
+      }
+    );
+
+    // dsconfig
+    tasks.push(
+      function dsconfig() {
+        var rgxClientId = /{{clientid}}/ig;
+        var rgxName = /{{name}}/ig;
+        var rgxUrl = /{{url}}/ig;
+        var rgxCallBack = /{{callback}}/ig;
+
+        function replaceVals(contents, file) {
+          contents = contents.replace(rgxClientId, clientId);
+          contents = contents.replace(rgxUrl, appPath);
+          contents = contents.replace(rgxCallBack, callBackUrl);          
+          return contents.replace(rgxName, appName);
+        }
+
+        return gulp
+          .src(cfg.src.common + 'setup.dsconfig')
+          .pipe($.insert.transform(replaceVals))
+          .pipe(gulp.dest(cfg.dist.path + app));    
+      }
+    );  
+
   });
   
   return gulp.parallel(tasks);
 }
 
 gulp.task('common:app', appCommon());
-
-/**
-     <link rel="stylesheet" href="style/bootstrap.css">
-    <link rel="stylesheet" href="style/font-awesome.css">
-    <link rel="stylesheet" href="style/app.css">
-
-    <script src="vendor/shim.min.js"></script>
-    <script src="vendor/zone.js"></script>
-    <script src="vendor/Reflect.js"></script>
-    <script src="vendor/systemjs/system.src.js"></script>
-    
-    <script src="vendor/jquery.js"></script>
-    <script src="vendor/bootstrap.js"></script>
-
-    <script src="vendor/systemjs/load.app.js"></script> 
- */
 
 // ANGULAR APP
 
