@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
-// import { NavComponent } from './nav.component'
+// import { NavComponent } from './nav.component';
 // import { Branding } from './branding.service';
 // import { ProductService } from './product.service';
 // import { ProfileService } from './profile.service';
 // import { CartService } from './cart.service';
 
 @Component({
-  selector: 'demo-main',
+  selector: 'main-app',
   template: `
-    <h1>main app component template</h1> 
-    <router-outlet></router-outlet>`,
+    <h1>main app component template</h1>`,
   directives: [ROUTER_DIRECTIVES]
   // template: `
   //   <demo-nav></demo-nav> 

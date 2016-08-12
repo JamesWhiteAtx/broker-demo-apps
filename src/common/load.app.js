@@ -1,4 +1,5 @@
 System.config({
+  "baseURL": "./",
   "paths": {
     "sysjs/*": "vendor/systemjs/*"
   },
@@ -11,12 +12,13 @@ System.config({
     }
   }  
 });
-System.import('sysjs/config.json')
-.then(function(config) { 
+
+System.import('sysjs/sysjs.config.json')
+.then(function(config) {
   return System.config(config);
 })
 .then(function(config) { 
-  return System.import('app');
+  return System.import('{{app}}');
 })
 .catch(function(reason) {
   console.error(reason);

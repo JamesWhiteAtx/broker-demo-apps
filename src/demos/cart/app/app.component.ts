@@ -2,10 +2,9 @@ import { Component } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
 
 @Component({
-  selector: 'demo-cart',
+  selector: 'cart-app',
   template: `
-    <h1>cart app component template</h1> 
-    <router-outlet></router-outlet>`,
+    <h1>cart app component template</h1>`,
   directives: [ROUTER_DIRECTIVES]
   // template: `
   //   <demo-nav></demo-nav> 

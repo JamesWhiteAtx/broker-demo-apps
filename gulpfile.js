@@ -17,7 +17,8 @@ const commonPath = 'common/';
 const htmlPath = 'html/';
 const appPkg = 'app';
 const appPath = appPkg + '/';
-const sharedPath = 'shared/';
+const sharedPkg = 'shared';
+const sharedPath = sharedPkg + '/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
 const pingPath = 'ping/';
@@ -324,7 +325,7 @@ function appCommon() {
       return '../' + vendorPath +  path.basename(script);
     })
     .concat('../' + vendorPath + sysjsPath +  path.basename(cfg.src.vendor.sysjs.npm));
-  var sysJsScript = '../' + vendorPath + sysjsPath + 'load.app.js'
+  var sysJsScript = 'load.app.js';
   var callBackScript = '../' + sharedPath + 'callback.js';
   var images = '../' + sharedPath + imgPath;
   var shortTag = '<link href= "' + images + 'unboundid-u-transparent-16x16.ico" rel="shortcut icon">'; 
@@ -426,6 +427,26 @@ function appCommon() {
       }
     );  
 
+    // sysjs load app js
+    tasks.push(
+      function loadappjs() {
+        var rgxBaseUrl = /"baseURL".*",/ig;
+        var rgxImportApp = /{{app}}/ig;
+
+        function replaceVals(contents, file) {
+          contents = contents.replace(rgxBaseUrl, 
+              '"baseURL": "../",');  
+          return contents.replace(rgxImportApp, app);
+        }
+
+        return gulp
+          .src(cfg.src.common + 'load.app.js')
+           .pipe(typeHeader())
+          .pipe($.insert.transform(replaceVals))
+          .pipe(gulp.dest(cfg.dist.path + app));          
+      }
+    );
+
   });
   
   return gulp.parallel(tasks);
@@ -454,16 +475,6 @@ function tsScript() {
 
 gulp.task('script:ts:npm', tsScript);
 
-// DSCONFIG
-
-function dsconfig() {
-  return gulp
-    .src(cfg.src.dsconfig)
-    .pipe(gulp.dest(cfg.dist.path));
-}
-
-gulp.task('dsconfig', dsconfig);
-
 // BUNDELS
 
 function makeNgPkgNames() {
@@ -474,13 +485,31 @@ function makeNgPkgNames() {
 
 function makeBundleSysJsCfg() {
   var map = {
+    [sharedPkg]: sourcePath + demosPath + sharedPkg,
     [rxjsPkg]: npmPath + rxjsPkg,
     [ngPkg]: npmPath + ngPkg
   };
 
+  //app// map.app = sourcePath + appPkg;
+  
+  cfg.apps.forEach(function(app) {
+    map[app] = sourcePath + demosPath + app + '/' + appPkg;
+  });
+  
+  map[tsPkg] = npmPath + 'typescript/lib';
+	map[plugintsPkg] = npmPath + 'plugin-typescript/lib';
+
   var packages = {
-    rxjs: {
+    [rxjsPkg]: {
       defaultExtension: 'js' 
+    },
+    [sharedPkg]: {
+      defaultExtension: 'ts',
+      "meta": {
+        "*.ts": {
+          "loader": "plugints"
+        }
+      }       
     }
   };
 
@@ -488,10 +517,7 @@ function makeBundleSysJsCfg() {
     packages[ngPath + pkgName] = { main: 'bundles/' + pkgName + '.umd.js', defaultExtension: 'js' };
   });
 
-  map.app = sourcePath + appPkg;
-  map[tsPkg] = npmPath + 'typescript/lib';
-	map[plugintsPkg] = npmPath + 'plugin-typescript/lib';
-
+/* //app//
   packages[appPkg] = {
       "main": "main.ts",
       "defaultExtension": "ts",
@@ -501,8 +527,21 @@ function makeBundleSysJsCfg() {
         }
       }
     };
+//app// */
+  
+  cfg.apps.forEach(function(app) {
+    packages[app] = {
+      "main": "main.ts",
+      "defaultExtension": "ts",
+      "meta": {
+        "*.ts": {
+          "loader": "plugints"
+        }
+      }   
+    };
+  });
 
-	packages[tsPkg] = {
+  packages[tsPkg] = {
       "main": "typescript.js",
       "defaultExtension": "js",
       "meta": {
@@ -513,9 +552,9 @@ function makeBundleSysJsCfg() {
     };
 
 	packages[plugintsPkg] = {
-      "main": "plugin.js",
-      "defaultExtension": "js"
-    };
+    "main": "plugin.js",
+    "defaultExtension": "js"
+  };
 
   var sysCfg = {
     'paths': { [vendorPath + '*']: npmPath + '*' },
@@ -528,7 +567,8 @@ function makeBundleSysJsCfg() {
 
 function makeDistSysJsCfg() {
   var map = {
-    [appPkg]: appPkg,
+    //[appPkg]: appPkg,
+    [sharedPkg]: sharedPkg,
     [tsPkg]: vendorPath + tsPkg,
     [plugintsPkg]: vendorPath + sysjsPath + plugintsPkg,
     [rxjsPkg]: vendorPath + rxjsPkg
@@ -538,15 +578,13 @@ function makeDistSysJsCfg() {
     map[ngPath + pkgName] = vendorPath + ngPath + pkgName + '.umd.js';
   });
 
+ cfg.apps.forEach(function(app) {
+    map[app] = app + '/' + appPkg;
+  });
+
   var packages = {
-    [appPkg]:    { 
-      'main': 'main.ts',  
-      'defaultExtension': 'ts',
-      'meta': {
-        '*.ts': {
-          'loader': plugintsPkg
-        }
-      }
+    [sharedPkg]:{
+      'defaultExtension': 'ts'
     },
     [tsPkg]: {
       'main': 'typescript.js',
@@ -566,12 +604,24 @@ function makeDistSysJsCfg() {
     }
   };
 
+ cfg.apps.forEach(function(app) {
+    packages[app] = { 
+      'main': 'main.ts',  
+      'defaultExtension': 'ts',
+      'meta': {
+        '*.ts': {
+          'loader': plugintsPkg
+        }
+      }
+    };
+  });
+
   var sysCfg = {
     'map': map,
     'packages': packages,
     'transpiler': plugintsPkg,
     'typescriptOptions': {
-      'tsconfig': appPath + 'tsconfig.json'
+      'tsconfig': 'tsconfig.json'
     }    
   };
 
@@ -586,8 +636,9 @@ function getDistSysJsCfg() {
 }
 
 function writePkgBundle(builder, pkg, trace) {
-  var bundleName = vendorPath + pkg + '.bundle.js';
-  var distFile = cfg.dist.path + bundleName;
+  var bundlePath = vendorPath + pkg + '.bundle.js';
+  var distFile = cfg.dist.path + bundlePath;
+  var bundleName = bundlePath;
 
   return builder.bundle(trace, distFile)
   .then(function(output) {
@@ -598,28 +649,34 @@ function writePkgBundle(builder, pkg, trace) {
   })
 }
 
-function libBundles() {
+function libBundles(cb) {
   var sysCfg = makeBundleSysJsCfg();
+
   var builder = new Builder();
   builder.config(sysCfg);
 
   var ngPkgs = makeNgPkgNames();
-  var allPkgs = ngPkgs.concat(appPkg);
+  var allPkgs = ngPkgs.concat(cfg.apps);
   var allPkgExpr = allPkgs.join(' + ');
 
   var noNgExpr = ngPkgs.map(function (pkg) {
     return '['+pkg+']';
   }).join(' - ');
 
-  var noAppNgExpr = noNgExpr + ' - [app/**/*]';
+  var noAppsExpr = cfg.apps.map(function (app) {
+    return '['+app+'/**/*]';
+  }).join(' - ');
 
-  return builder.trace('(' + allPkgExpr + ') - ' + noAppNgExpr)
+  var noAppNgExpr = noNgExpr + ' - ' + noAppsExpr  + ' - [' + sharedPkg + '/**/*]';
+  var bundleExpr = '(' + allPkgExpr + ') - ' + noAppNgExpr;
+
+  return builder.trace(bundleExpr)
   .then(function (trace) {
     return writePkgBundle(builder, 'lib', trace);
   })
   .then(function () {
     var sysJsCfg = getDistSysJsCfg();
-    return fs.writeFile(cfg.dist.sysjs + 'config.json', 
+    return fs.writeFile(cfg.dist.vendor.sysjs + 'sysjs.config.json', 
       JSON.stringify(sysJsCfg, null, 2) , 'utf-8');
   })
   ;
@@ -628,17 +685,20 @@ function libBundles() {
 gulp.task('bundles:lib', libBundles);
 
 // BUILD
-var build = gulp.parallel(
-  npmScript,
-  ngScript,
-  sysjsScript,
-  tsScript,
-  style,
-  appCommon(), 
-  appHtml, 
-  appNg
-  //,libBundles
-  ); 
+var build = 
+
+gulp.series(
+  gulp.parallel(
+    npmScript,
+    ngScript,
+    sysjsScript,
+    tsScript,
+    style,
+    appCommon(), 
+    appHtml, 
+    appNg), 
+  libBundles
+)
 
 gulp.task('build', build);
 
@@ -668,17 +728,17 @@ function server(cb) {
 }
 
 function buildWatch() {
+  gulp.watch(cfg.src.vendor.sysjs.js, {delay: cfg.src.delay}, sysjsJs);
+
+  gulp.watch(cfg.src.img, {delay: cfg.src.delay}, appImg);
+
   gulp.watch(cfg.src.scss, {delay: cfg.src.delay}, appStyle);
   
-  gulp.watch(cfg.src.html, {delay: cfg.src.delay}, appHtml);
-
-  // gulp.watch(cfg.src.vendor.ping, {delay: cfg.src.delay}, pingSript);
-
-  // gulp.watch(cfg.src.config, {delay: cfg.src.delay}, appConfig);
+  gulp.watch(cfg.src.common + '**/*.*', {delay: cfg.src.delay}, appCommon());
   
-  gulp.watch(cfg.src.vendor.load, {delay: cfg.src.delay}, sysjsJs);
+  gulp.watch(cfg.src.demos.html, {delay: cfg.src.delay}, appHtml);
 
-  gulp.watch(cfg.src.app, {delay: cfg.src.delay}, appNg);
+  gulp.watch(cfg.src.demos.app, {delay: cfg.src.delay}, appNg);
 }
 
 gulp.task('watch:build', buildWatch);
@@ -749,8 +809,7 @@ gulp.task('serve:reload', gulp.series(
 
 gulp.task('release', gulp.series(
     clean,
-    build,
-    dsconfig
+    build
 ));
 
 // /Users/jameswhite/Source/deploy/ib2/docs/demo/';
