@@ -37,6 +37,7 @@
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-concat": "^2.6.0",
     "gulp-header": "^1.8.7",
+    "gulp-html-replace": "^1.6.1",
     "gulp-insert": "^0.5.0",
     "gulp-livereload": "^3.8.1",
     "gulp-load-plugins": "^1.2.4",

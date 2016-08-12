@@ -9,14 +9,15 @@ const pkg = require('./package.json');
 const through = require('through2');
 const $ = require('gulp-load-plugins')();
 
-const commonPath = 'common/';
 const npmPath = 'node_modules/';
 const sourcePath = 'src/';
 const demosPkg = 'demos';
 const demosPath = demosPkg + '/';
+const commonPath = 'common/';
 const htmlPath = 'html/';
 const appPkg = 'app';
 const appPath = appPkg + '/';
+const sharedPath = 'shared/';
 const vendorPkg = 'vendor';
 const vendorPath = vendorPkg + '/';
 const pingPath = 'ping/';
@@ -58,7 +59,8 @@ function configure(dist, proxy, base) {
     proxyTarget: proxyTarget,
     basePath: basePath,
     src: {
-      html: sourcePath + htmlPath + '*.html',
+      //html: sourcePath + htmlPath + '*.html',
+      common: sourcePath + commonPath,
       //app: sourcePath + appPath + '**/*.*',
       scss: sourcePath + stylePath + '**/*.scss',
       script: sourcePath + 'js/**/*.js',
@@ -79,9 +81,9 @@ function configure(dist, proxy, base) {
         npm: [
           npmPath + 'jquery/dist/jquery.js',
           npmPath + 'bootstrap-sass/assets/javascripts/bootstrap.js',
-          npmPath + 'reflect-metadata/Reflect.js',
+          npmPath + 'core-js/client/shim.min.js',
           npmPath + 'zone.js/dist/zone.js',
-          npmPath + 'core-js/client/shim.min.js'
+          npmPath + 'reflect-metadata/Reflect.js'
         ],
         ts: {
           npm: npmPath + 'typescript/lib/typescript.js'
@@ -110,15 +112,15 @@ function configure(dist, proxy, base) {
       reload: distPath + '**/*.{html,htm,css,js,ts,json}',
       clean: distPath + '**/*',
       demo: distPath + demosPath,
-      common: {
-        vendor: distPath + commonPath,
-        ng: distPath + commonPath + ngPath,
-        sysjs: distPath + commonPath + sysjsPath,
-        plugints: distPath + commonPath + sysjsPath + plugintsPath,
-        ts: distPath + commonPath + tsPath,
-        style: distPath + commonPath + stylePath,
-        font: distPath + commonPath + 'fonts/',
-        img: distPath + commonPath + 'img/',
+      vendor: {
+        vendor: distPath + vendorPath,
+        ng: distPath + vendorPath + ngPath,
+        sysjs: distPath + vendorPath + sysjsPath,
+        plugints: distPath + vendorPath + sysjsPath + plugintsPath,
+        ts: distPath + vendorPath + tsPath,
+        style: distPath + vendorPath + stylePath,
+        font: distPath + vendorPath + 'fonts/',
+        img: distPath + vendorPath + 'img/',
       },
       app: distPath + 'app/',
       // font: distPath + 'fonts/',
@@ -165,7 +167,7 @@ function vendorStyle() {
             .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
             .pipe($.rename('bootstrap.css'))
         )
-        .pipe(gulp.dest(cfg.dist.common.style));
+        .pipe(gulp.dest(cfg.dist.vendor.style));
 }
 
 gulp.task('style:vendor', vendorStyle);
@@ -173,7 +175,7 @@ gulp.task('style:vendor', vendorStyle);
 function vendorFont() {
 	return gulp
         .src(cfg.src.vendor.fonts)
-        .pipe(gulp.dest(cfg.dist.common.font));
+        .pipe(gulp.dest(cfg.dist.vendor.font));
 }
 
 gulp.task('font:vendor', vendorFont);
@@ -181,7 +183,7 @@ gulp.task('font:vendor', vendorFont);
 function appImg() {
 	return gulp
         .src(cfg.src.img)
-        .pipe(gulp.dest(cfg.dist.common.img));
+        .pipe(gulp.dest(cfg.dist.vendor.img));
 }
 
 gulp.task('img:app', appImg);
@@ -192,7 +194,7 @@ function appStyle() {
         .pipe($.sass(cfg.src.sassopts).on('error', $.sass.logError))
         .pipe($.concat(cfg.dist.styles.app))
         .pipe(typeHeader())
-        .pipe(gulp.dest(cfg.dist.common.style));
+        .pipe(gulp.dest(cfg.dist.vendor.style));
 }
 
 gulp.task('style:app', appStyle);
@@ -244,7 +246,7 @@ function typeHeader() {
 function npmScript() {
   return gulp
     .src(cfg.src.vendor.npm)
-    .pipe(gulp.dest(cfg.dist.common.vendor));
+    .pipe(gulp.dest(cfg.dist.vendor.vendor));
 }
 
 gulp.task('script:npm', npmScript);
@@ -257,7 +259,7 @@ function ngScript() {
   });
   return gulp
     .src(ngPkgs)
-    .pipe(gulp.dest(cfg.dist.common.ng)); 
+    .pipe(gulp.dest(cfg.dist.vendor.ng)); 
 }
 
 gulp.task('script:ng', ngScript);
@@ -267,7 +269,7 @@ gulp.task('script:ng', ngScript);
 function sysjsNpm() {
   return gulp
     .src(cfg.src.vendor.sysjs.npm)
-    .pipe(gulp.dest(cfg.dist.common.sysjs));
+    .pipe(gulp.dest(cfg.dist.vendor.sysjs));
 }
 
 gulp.task('script:sysjs:npm', sysjsNpm);
@@ -277,7 +279,7 @@ gulp.task('script:sysjs:npm', sysjsNpm);
 function sysjsPlug() {
   return gulp
     .src(cfg.src.vendor.sysjs.plugints)
-    .pipe(gulp.dest(cfg.dist.common.plugints));
+    .pipe(gulp.dest(cfg.dist.vendor.plugints));
 }
 
 gulp.task('script:sysjs:plug', sysjsPlug);
@@ -287,7 +289,7 @@ gulp.task('script:sysjs:plug', sysjsPlug);
 function sysjsJs() {
   return gulp
     .src(cfg.src.vendor.sysjs.js)
-    .pipe(gulp.dest(cfg.dist.common.sysjs));
+    .pipe(gulp.dest(cfg.dist.vendor.sysjs));
 }
 
 gulp.task('script:sysjs:js', sysjsJs);
@@ -307,32 +309,55 @@ function appHtml() {
 
 gulp.task('html:app', appHtml);
 
-function replaceBaseHref(contents, file) {
-  var rgx = /<base [^>]*href=\"(.*?)\">/ig;
-  if (contents.search(rgx) === -1) {
-    return contents;
-  } else {
-    var fromPath = path.normalize(__dirname + '/' + sourcePath);
-    var relativePath = path.relative(fromPath , file.dirname);
-    var baseHref = path.normalize(cfg.basePath + relativePath + '/');
-    return contents.replace(rgx, 
-      '<base href="' + cfg.basePath + '">')
-  }
-}
+// INDEX AND CALLBACK
 
-function appIndex() {
-  var apps = ['main/', 'cart/', 'social/'];
+function appCommon() {
+  var apps = ['main', 'cart', 'social'];
   var tasks = [];
+  var rgx = /<base [^>]*href=\"(.*?)\">/ig;
 
-  apps.forEach(function(appPath) {
+  var styles = ['bootstrap.css','font-awesome.css','app.css'].map(function(style) {
+      return '../' + vendorPath + stylePath +  style;
+    });
+  var scripts = cfg.src.vendor.npm
+    .map(function(script) {
+      return '../' + vendorPath +  path.basename(script);
+    })
+    .concat('../' + vendorPath + sysjsPath +  path.basename(cfg.src.vendor.sysjs.npm));
+  var sysJsScript = '../' + vendorPath + sysjsPath + 'load.app.js'
+  var callBackScript = '../' + sharedPath + 'callback.js';
+
+  apps.forEach(function(app) {
     tasks.push(
       function() {
-        console.log('appPath', appPath);
+        function replaceBaseHref(contents, file) {
+          return contents.replace(rgx, 
+              '<base href="' + cfg.basePath + app + '/">');
+        }
+        var demoTag = '<' + app + '-app>Loading...</' + app + '-app>';
+        var replaceCfg = {
+            'css': styles,
+            'js': scripts,
+            'sysjs': sysJsScript,
+            'loading': demoTag
+        };
+
         return gulp
-            .src(cfg.src.html)
-            .pipe($.insert.transform(replaceBaseHref))
+            .src(cfg.src.common + 'index.html')
             .pipe(typeHeader())
-            .pipe(gulp.dest(cfg.dist.path + appPath));
+            .pipe($.insert.transform(replaceBaseHref))
+            .pipe($.htmlReplace(replaceCfg))
+            .pipe(gulp.dest(cfg.dist.path + app));
+      }
+    );
+
+    tasks.push(
+      function() {
+        return gulp
+            .src(cfg.src.common + 'callback.html')
+            .pipe(typeHeader())
+            .pipe($.htmlReplace({'js': callBackScript }))
+            .pipe(gulp.dest(cfg.dist.path + app));        
       }
     );
   });
@@ -340,7 +365,23 @@ function appIndex() {
   return gulp.parallel(tasks);
 }
 
-gulp.task('index:app', appIndex());
+gulp.task('common:app', appCommon());
+
+/**
+     <link rel="stylesheet" href="style/bootstrap.css">
+    <link rel="stylesheet" href="style/font-awesome.css">
+    <link rel="stylesheet" href="style/app.css">
+
+    <script src="vendor/shim.min.js"></script>
+    <script src="vendor/zone.js"></script>
+    <script src="vendor/Reflect.js"></script>
+    <script src="vendor/systemjs/system.src.js"></script>
+    
+    <script src="vendor/jquery.js"></script>
+    <script src="vendor/bootstrap.js"></script>
+
+    <script src="vendor/systemjs/load.app.js"></script> 
+ */
 
 // ANGULAR APP
 
@@ -358,7 +399,7 @@ gulp.task('ng:app', appNg);
 function tsScript() {
   return gulp
     .src(cfg.src.vendor.ts.npm)
-    .pipe(gulp.dest(cfg.dist.common.ts));
+    .pipe(gulp.dest(cfg.dist.vendor.ts));
 }
 
 gulp.task('script:ts:npm', tsScript);
@@ -542,7 +583,8 @@ var build = gulp.parallel(
   ngScript,
   sysjsScript,
   tsScript,
-  style, 
+  style,
+  appCommon(), 
   appHtml, 
   appNg
   //,libBundles
