@@ -9,7 +9,8 @@ import { ROUTER_DIRECTIVES } from '@angular/router';
 @Component({
   selector: 'main-app',
   template: `
-    <h1>main app component template</h1>`,
+    <h1>main app component template</h1>
+    <router-outlet></router-outlet>`,
   directives: [ROUTER_DIRECTIVES]
   // template: `
   //   <demo-nav></demo-nav> 

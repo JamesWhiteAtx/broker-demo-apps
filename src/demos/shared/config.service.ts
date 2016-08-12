@@ -12,7 +12,7 @@ export class ConfigService {
   public configuration$: Observable<Configuration> = this._configuration.asObservable();
 
   constructor(private http: Http) {
-    this.http.get('config/config.json')
+    this.http.get('config.json')
       .subscribe(response => {
         var raw: any = response.json();
         

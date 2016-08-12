@@ -1,23 +1,22 @@
 import { bootstrap }    from '@angular/platform-browser-dynamic';
 import { HTTP_PROVIDERS } from '@angular/http';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
-//import { APP_ROUTER_PROVIDERS } from './app.routes';
+import { APP_ROUTER_PROVIDERS } from './app.routes';
 import { AppComponent } from './app.component';
 import { ConfigService } from '../../shared/config.service';
-// import { AuthService } from './auth.service';
+import { AuthService } from '../../shared/auth.service';
 // import { AuthGuard } from './auth-guard.service';
 
 bootstrap(AppComponent, [ 
   HTTP_PROVIDERS, 
-  //APP_ROUTER_PROVIDERS,
-  { provide: LocationStrategy, useClass: HashLocationStrategy }
-  ,  ConfigService
-  //, AuthService, AuthGuard
+  APP_ROUTER_PROVIDERS,
+  { provide: LocationStrategy, useClass: HashLocationStrategy },  
+  ConfigService, AuthService  // , AuthGuard
 ])
-  .then(
-    () => window.console.info( 'Angular finished bootstrapping main application!' ),
-    (error) => {
-      console.warn( 'Angular was not able to bootstrap main application.' );
-      console.error( error );
-    }
-  );
+.then(
+  () => window.console.info( 'Finished bootstrapping application!' ),
+  (error) => {
+    console.warn( 'Unable to bootstrap application.' );
+    console.error( error );
+  }
+);
