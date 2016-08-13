@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
+import { NavComponent } from '../../shared/nav.component';
+import { BrandingService } from '../../shared/branding.service';
 
 @Component({
   selector: 'cart-app',
   template: `
-    <h1>cart app component template</h1>`,
-  directives: [ROUTER_DIRECTIVES]
-  // template: `
-  //   <demo-nav></demo-nav> 
-  //   <router-outlet></router-outlet>`,
-  //directives: [ROUTER_DIRECTIVES, NavComponent],
-  //providers: [Branding, ProductService, ProfileService, CartService]
+    <demo-nav></demo-nav> 
+    <div>cart app component template</div>
+    <div class="row"><div class="col-sm-3"><a href="../main">Main</a></div><div class="col-sm-3"><a href="../social">Social</a></div></div>
+    `,
+  directives: [ROUTER_DIRECTIVES, NavComponent],
+  providers: [BrandingService]
 })
 export class AppComponent {}

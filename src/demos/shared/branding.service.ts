@@ -6,20 +6,22 @@ import { Observable } from 'rxjs/Observable';
 export class Brand {
   constructor(
     public title: string,
-    public logo: string
-  ) { }
+    public logo: string) { 
+  }
 }
 
 @Injectable()
-export class Branding {
-  private _brand: ReplaySubject<Brand> = new ReplaySubject<Brand>(1);
-  public brand$: Observable<Brand> = this._brand.asObservable();
+export class BrandingService {
+  private _data: ReplaySubject<Brand> = new ReplaySubject<Brand>(1);
+  public data$: Observable<Brand> = this._data.asObservable();
 
+  
   constructor(private http: Http) {
-    this.http.get('config/brand.json')
+    this.http.get('brand.json')
       .subscribe(response => {
         var raw: any = response.json();
-        this._brand.next( new Brand(raw.title, raw.logo) );
+         this._data.next( new Brand(raw.title, raw.logo) );
       });
   }
 }
+

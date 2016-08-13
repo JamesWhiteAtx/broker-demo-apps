@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
-// import { NavComponent } from './nav.component';
-// import { Branding } from './branding.service';
+import { NavComponent } from '../../shared/nav.component';
+import { BrandingService } from '../../shared/branding.service';
 // import { ProductService } from './product.service';
 // import { ProfileService } from './profile.service';
 // import { CartService } from './cart.service';
@@ -9,13 +9,16 @@ import { ROUTER_DIRECTIVES } from '@angular/router';
 @Component({
   selector: 'main-app',
   template: `
-    <h1>main app component template</h1>
+    <demo-nav></demo-nav>
+    <div>main app component template</div>
+    <div class="row"><div class="col-sm-3"><a href="../cart">Cart</a></div><div class="col-sm-3"><a href="../social">Social</a></div></div>
     <router-outlet></router-outlet>`,
-  directives: [ROUTER_DIRECTIVES]
   // template: `
   //   <demo-nav></demo-nav> 
   //   <router-outlet></router-outlet>`,
-  //directives: [ROUTER_DIRECTIVES, NavComponent],
-  //providers: [Branding, ProductService, ProfileService, CartService]
+  directives: [ROUTER_DIRECTIVES, NavComponent],
+  providers: [BrandingService
+  //, ProductService, ProfileService, CartService
+  ]
 })
 export class AppComponent {}

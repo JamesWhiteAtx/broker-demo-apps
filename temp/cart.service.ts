@@ -88,7 +88,7 @@ export class CartService {
   }
 
   private getStoredCart(): CartData {
-    var serialized = window.sessionStorage.getItem(CART_KEY);
+    var serialized = window..getItem(CART_KEY);
     var stored = (serialized) ? <CartData>JSON.parse(serialized) : <CartData>{};
     stored.items = stored.items || [];
     return stored;

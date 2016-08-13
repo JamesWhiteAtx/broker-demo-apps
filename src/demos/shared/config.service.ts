@@ -8,15 +8,15 @@ import { Configuration } from './configuration';
 
 @Injectable()
 export class ConfigService {
-  private _configuration: ReplaySubject<Configuration> = new ReplaySubject<Configuration>(1);
-  public configuration$: Observable<Configuration> = this._configuration.asObservable();
+  private _data: ReplaySubject<Configuration> = new ReplaySubject<Configuration>(1);
+  public data$: Observable<Configuration> = this._data.asObservable();
 
   constructor(private http: Http) {
     this.http.get('config.json')
       .subscribe(response => {
         var raw: any = response.json();
         
-        this._configuration.next(
+        this._data.next(
         	new Configuration(
             raw.IDENTITY_PROVIDER_URL, 
             raw.RESOURCE_SERVER_URL,

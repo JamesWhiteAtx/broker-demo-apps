@@ -1,0 +1,35 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">
+        <img *ngIf="brand" [src]="brand.logo" [alt]="brand.title" class="img-responsive" alt="Brand">
+      </a>
+    </div>
+    
+    <div class="collapse navbar-collapse" id="navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+
+        <li>Authorized: {{authorized}}</li>
+        <li *ngIf="!authorized">
+          <a href="#" title="Sign In" (click)="auth?.requestAuth()">
+            <i class="fa fa-user"></i> Sign In!
+          </a>
+        </li>
+
+        <li *ngIf="authorized">
+          <a href="#" title="Sign Out" (click)="auth?.logout()">
+            <i class="fa fa-sign-out"></i> Sign Out
+          </a>
+        </li>        
+
+      </ul>
+    </div>
+
+  </div>
+</nav>

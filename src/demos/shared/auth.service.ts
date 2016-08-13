@@ -4,6 +4,8 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { Jwt } from './jwt';
 import { ConfigService } from './config.service';
+import { Configuration } from './configuration';
+import { StorageService } from './storage.service';
 
 interface UrlParms {
   [key: string]: string;
@@ -62,6 +64,12 @@ export class AuthState {
   }
 } 
 
+class AuthStore {
+  reqUrl: string;
+  reqState: string;
+  respFrag: string;
+}
+
 const AUTH_VALUES_KEY = 'demo_auth_values';
 const AUTH_STATE_KEY = 'demo_auth_state';
 const AUTH_LAST_URL = 'demo_last_url';
@@ -74,7 +82,9 @@ export class AuthService {
   private _authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public authorized$: Observable<boolean> = this._authorized.asObservable().distinctUntilChanged();
 
-  constructor(private config: ConfigService) {
+  constructor(
+    private config: ConfigService,
+    private storage: StorageService) {
     this.init();
   }
   
@@ -91,14 +101,18 @@ export class AuthService {
         this._authorized.next(authorized);
       });
 
-    this.decodeAuth(this.loadEncodedValues());
+    this.config.data$.subscribe(cfg => {
+      this.decodeAuth(cfg, this.loadEncodedValues(cfg));
+    });
+    //.unsubscribe();
+
   }
 
   lastAuthUtl() {
     return window.sessionStorage.getItem(AUTH_LAST_URL);
   }
 
-  private decodeAuth(encoded) {
+  private decodeAuth(cfg: Configuration, encoded) {
     var state: AuthState = new AuthState(encoded);
     
     if (state.authorized) {
@@ -110,7 +124,7 @@ export class AuthService {
     this._state.next(state);
   }
 
-  private loadEncodedValues(): string {
+  private loadEncodedValues(cfg: Configuration): string {
     var searchParams: Object;
     var chash: Object;
     
@@ -125,6 +139,10 @@ export class AuthService {
         }
       }
     }
+
+    var id = cfg.clientID;
+    var authStore = this.storage.getObject<AuthStore>(id);
+
     // if not return yet, try to read the auth values string from storage 
     return window.sessionStorage.getItem(AUTH_VALUES_KEY);
   }
@@ -132,10 +150,17 @@ export class AuthService {
   private requestAuth() {
     var stateToken = this.makeStateToken();
     
-    this.config.configuration$.subscribe(cfg => {
+    this.config.data$.subscribe(cfg => {
       var url = cfg.getAuthorizeUrl(stateToken);
       window.sessionStorage.setItem(AUTH_STATE_KEY, stateToken);
       window.sessionStorage.setItem(AUTH_LAST_URL, url);
+
+      var id = cfg.clientID;
+      var authStore = new AuthStore();
+      authStore.reqState = stateToken;
+      authStore.reqUrl = url;
+      this.storage.setObject(id, authStore);
+
       window.location.assign(url);
     })
     .unsubscribe();
@@ -143,7 +168,7 @@ export class AuthService {
   }
 
   private logout() {
-    this.config.configuration$.subscribe(cfg => {
+    this.config.data$.subscribe(cfg => {
       var stateToken = window.sessionStorage.getItem(AUTH_STATE_KEY);
       var url = cfg.getLogoutUrl(stateToken);
       window.location.assign(url);
