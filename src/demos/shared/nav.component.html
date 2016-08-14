@@ -26,7 +26,19 @@
           <a href="#" title="Sign Out" (click)="auth?.logout()">
             <i class="fa fa-sign-out"></i> Sign Out
           </a>
-        </li>        
+        </li>       
+
+        <li>
+          <a href="/samples/my-account" title="Account">
+            <i class="fa fa-user"></i> My Account
+          </a>
+        </li>       
+
+        <li routerLinkActive="active">
+          <a routerLink="/session">
+            <i class="fa fa-key"></i> Session
+          </a>
+        </li>
 
       </ul>
     </div>

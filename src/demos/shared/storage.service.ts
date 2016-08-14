@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core';
 
 const MULTI_STORE_KEY = 'demo_multi_store';
 
-class KeyHash {
+export class KeyHash {
   [key: string]: Object;
 }
 
@@ -21,7 +21,7 @@ export class StorageService {
     this.clearMultiVal(key);
   }
 
-  private getMulti(): KeyHash {
+  getMulti(): KeyHash {
     return this.getObject<KeyHash>(MULTI_STORE_KEY) || new KeyHash();
   }
 

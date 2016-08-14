@@ -3,8 +3,9 @@
   "RESOURCE_SERVER_URL": "/",
   "AUTHORIZE_ROUTE": "oauth/authorize",
   "LOGOUT_ROUTE": "oauth/logout",
-  "CLIENT_ID": "@client@",
   "CLIENT_REDIRECT_URL": "callback.html",
-  "SCOPES": ["openid", "profile", "urn:unboundid:scope:manage_profile"],
-  "ACR_VALUES": ["MFA", "Default"]
+  "RESPONSE_TYPE": "token id_token",
+  "CLIENT_ID": "@client@",
+  "SCOPES": "openid profile urn:unboundid:scope:manage_profile",
+  "ACR_VALUES": "MFA Default"
 }

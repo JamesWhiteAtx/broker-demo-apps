@@ -14,17 +14,18 @@ export class ConfigService {
     this.http.get('config.json')
       .subscribe(response => {
         var raw: any = response.json();
-        
-        this._data.next(
-        	new Configuration(
-            raw.IDENTITY_PROVIDER_URL, 
-            raw.RESOURCE_SERVER_URL,
-            raw.AUTHORIZE_ROUTE,
-            raw.LOGOUT_ROUTE,
-            raw.CLIENT_REDIRECT_URL,
-            raw.CLIENT_ID,
-            raw.SCOPES,
-            raw.ACR_VALUES));
+        let cfg = new Configuration();
+        cfg.identityProviderUrl = raw.IDENTITY_PROVIDER_URL;
+        cfg.resourceServerUrl = raw.RESOURCE_SERVER_URL;
+        cfg.authorizeRoute = raw.AUTHORIZE_ROUTE;
+        cfg.logoutRoute = raw.LOGOUT_ROUTE;
+        cfg.clientRedirectUrl = raw.CLIENT_REDIRECT_URL;
+        cfg.responseType = raw.RESPONSE_TYPE;
+        cfg.clientID = raw.CLIENT_ID;
+        cfg.scopes = raw.SCOPES;
+        cfg.acrValues = raw.ACR_VALUES;
+
+        this._data.next(cfg);
       });
   }
 

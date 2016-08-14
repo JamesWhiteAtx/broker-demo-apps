@@ -1,28 +1,34 @@
 export class Configuration {
-  responseType: string
+  public identityProviderUrl: string;
+  public resourceServerUrl: string;
+  public authorizeRoute: string;
+  public logoutRoute: string;
+  public clientRedirectUrl: string;
+  public responseType: string;
+  public clientID: string;
+  public scopes: string;
+  public acrValues: string;
 
-  constructor(
-    public identityProviderUrl: string,
-    public resourceServerUrl: string,
-    public authorizeRoute: string,
-    public logoutRoute: string,
-    public clientRedirectUrl: string,
-    public clientID: string,
-    public scopes: string[],
-    public acrValues: string[]) {
-
-    this.responseType = 'token id_token';
-  }
+  //constructor() {  }
 
   getAuthorizeUrl(state: string) {
-    return this.buildUrl(this.identityProviderUrl, this.authorizeRoute) + '?' +
-      'response_type=' + encodeURIComponent(this.responseType) + '&' +
-      'client_id=' + encodeURIComponent(this.clientID) + '&' +
-      'redirect_uri=' + encodeURIComponent(this.clientRedirectUrl) + '&' +
-      'scope=' + encodeURIComponent(this.scopes.join(' ')) + '&' +
-      'acr_values=' + encodeURIComponent(this.acrValues.join(' ')) + '&' +
-      'nonce=' + encodeURIComponent(state) + '&' +
-      'state=' + encodeURIComponent(state);
+    let params: string[] = [
+      'response_type=' + encodeURIComponent(this.responseType),
+      'client_id=' + encodeURIComponent(this.clientID),
+      'redirect_uri=' + encodeURIComponent(this.clientRedirectUrl)
+    ];
+    if (this.scopes) {
+      params.push('scope=' + encodeURIComponent(this.scopes));
+    }
+    if (this.acrValues) {
+      params.push('acr_values=' + encodeURIComponent(this.acrValues));
+    }
+    if (state) {
+      params.push('state=' + encodeURIComponent(state));
+      params.push('nonce=' + encodeURIComponent(state));
+    }
+
+    return this.buildUrl(this.identityProviderUrl, this.authorizeRoute) + '?' + params.join('&');
   }
 
   getLogoutUrl(state: string) {

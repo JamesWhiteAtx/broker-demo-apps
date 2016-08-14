@@ -16,6 +16,7 @@ export class NavComponent implements OnInit {
   authorized: boolean;
   authUrl: string;
   logoutUrl: string;
+  accountUrl: string;
   //profile: Profile;
 
   public constructor(
