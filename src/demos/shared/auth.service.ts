@@ -31,37 +31,64 @@ export interface AuthParams {
   error_description?: string;
 } 
 
+export interface AuthErr {
+  error: string;
+  description: string;
+}
+
 export class AuthState {
-  encoded: string;
+  respFrag: string;
   respParams: AuthParams;
-  bearerToken: Jwt;
+  accessToken: Jwt;
   idToken: Jwt;
+  errors: AuthErr[];
 
   private _authorized: boolean;
 
-  constructor(encoded?: string) {
-    if (encoded) {
-      this.encoded = encoded;
-      this.respParams = <AuthParams>parseParams(atob(decodeURIComponent(this.encoded)));
-      this.bearerToken = new Jwt(this.respParams.access_token);
-      this.idToken = new Jwt(this.respParams.id_token);
-      
-      this._authorized = this.bearerToken.valid;
-    } else {
-      this._authorized = false;
+  constructor(authStore?: AuthStore) {
+    this._authorized = false;
+    this.errors = [];
+    
+    if (authStore) {
+      this.respFrag = authStore.respFrag;
+      if (this.respFrag) {
+        this.respParams = <AuthParams>parseParams(atob(decodeURIComponent(this.respFrag)));
+
+        // check for response errors
+        if (this.respParams.error) {
+          this.addErr(this.respParams.error, this.respParams.error_description);
+        }
+
+        // compare state  
+        if (authStore.reqState != this.respParams.state) {
+          this.addErr('State', 'Request state (' + authStore.reqState +
+            ') does not match response state (' + this.respParams.state + ').');
+        }
+
+        this.accessToken = new Jwt(this.respParams.access_token);
+        this.accessToken.errors.forEach(descr => this.addErr('Access Token', descr));
+
+        if (this.respParams.id_token) {
+          this.idToken = new Jwt(this.respParams.id_token);
+          this.idToken.errors.forEach(descr => this.addErr('ID Token', descr));
+        }
+
+        this._authorized = this.accessToken.valid;
+      }
     }
   }
 
   get authorized(): boolean {
     if (this._authorized) {
-      this._authorized = this.bearerToken.valid;
+      this._authorized = this.accessToken.valid;
     }
     return this._authorized;
   }
 
-  private decode(encoded: string): AuthParams {
-    return parseParams(atob(decodeURIComponent(this.encoded)));
+  private addErr(error: string, description: string) {
+    this.errors.push({error: error, description: description});
   }
+  
 } 
 
 class AuthStore {
@@ -69,10 +96,6 @@ class AuthStore {
   reqState: string;
   respFrag: string;
 }
-
-const AUTH_VALUES_KEY = 'demo_auth_values';
-const AUTH_STATE_KEY = 'demo_auth_state';
-const AUTH_LAST_URL = 'demo_last_url';
 
 @Injectable()
 export class AuthService {
@@ -82,44 +105,33 @@ export class AuthService {
   private _authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public authorized$: Observable<boolean> = this._authorized.asObservable().distinctUntilChanged();
 
+  private responseSearch: string;
+
   constructor(
     private config: ConfigService,
     private storage: StorageService) {
-    this.init();
-  }
-  
-  private init() {
-    this.state$ 
-      .subscribe(state => {
-        var authorized = !!state && !!state.authorized;
-        
-        if (authorized) {
-          var stateToken = window.sessionStorage.getItem(AUTH_STATE_KEY);
-          authorized = (state.respParams.state === stateToken);
-        }
+    
+    this.responseSearch = window.location.search;
 
-        this._authorized.next(authorized);
-      });
+    this.subscribeToStateChange();
 
     this.config.data$.subscribe(cfg => {
       this.decodeAuth(cfg, this.loadAuthStore(cfg));
     });
-  
   }
 
-  lastAuthUtl() {
-    return window.sessionStorage.getItem(AUTH_LAST_URL);
+  private subscribeToStateChange() {
+    this.state$ 
+      .subscribe(state => {
+        var authorized = !!state && !!state.authorized;
+
+        this._authorized.next(authorized);
+        //this._error.next(any errors);
+      });
   }
 
   private decodeAuth(cfg: Configuration, authStore: AuthStore) {
-    var state: AuthState = new AuthState(authStore.respFrag);
-    
-    if (state.authorized) {
-      window.sessionStorage.setItem(AUTH_VALUES_KEY, state.encoded);
-    } else {
-      window.sessionStorage.removeItem(AUTH_VALUES_KEY);
-    }
-
+    var state: AuthState = new AuthState(authStore);
     this._state.next(state);
   }
 
@@ -127,20 +139,18 @@ export class AuthService {
     var searchParams: Object;
     var chash: Object;
 
-    var authStore = this.retrieveAuth(cfg);
+    var authStore = this.getStore(cfg);
     
-    searchParams = parseParams(window.location.search);
+    searchParams = parseParams(this.responseSearch);
     if (searchParams) {
       chash = searchParams['chash'];
       if (typeof chash === 'string') {  // there is a chash param
         if (chash.length > 0) {         // the chash has a value
           authStore.respFrag = chash;
+          this.setStore(cfg, authStore);
         }
       }
     }
-
-    // if not return yet, try to read the auth values string from storage 
-    //return window.sessionStorage.getItem(AUTH_VALUES_KEY);
 
     return authStore;
   }
@@ -150,13 +160,12 @@ export class AuthService {
     
     this.config.data$.subscribe(cfg => {
       var url = cfg.getAuthorizeUrl(stateToken);
-      window.sessionStorage.setItem(AUTH_STATE_KEY, stateToken);
-      window.sessionStorage.setItem(AUTH_LAST_URL, url);
 
       var authStore = new AuthStore();
       authStore.reqState = stateToken;
       authStore.reqUrl = url;
-      this.storeAuth(cfg, authStore);
+
+      this.setStore(cfg, authStore);
 
       window.location.assign(url);
     })
@@ -166,10 +175,10 @@ export class AuthService {
 
   private logout() {
     this.config.data$.subscribe(cfg => {
-      var stateToken = window.sessionStorage.getItem(AUTH_STATE_KEY);
-      var url = cfg.getLogoutUrl(stateToken);
 
-      this.removeAuth(cfg);
+      var authStore = this.getStore(cfg);
+      var url = cfg.getLogoutUrl(authStore.reqState);
+      this.removeStore(cfg);
 
       window.location.assign(url);
     })
@@ -177,14 +186,19 @@ export class AuthService {
     return false;
   }
 
-  private storeAuth(cfg: Configuration, authStore: AuthStore) {
+  private setStore(cfg: Configuration, authStore: AuthStore) {
     this.storage.set(cfg.clientID, authStore);
   }
-  private retrieveAuth(cfg: Configuration): AuthStore {
-    return this.storage.get<AuthStore>(cfg.clientID);
+  private getStore(cfg: Configuration): AuthStore {
+    var authStore = this.storage.get<AuthStore>(cfg.clientID);
+    if (! authStore) {
+      authStore = new AuthStore;
+    }
+    return authStore;
   }
-  private removeAuth(cfg: Configuration) {
+  private removeStore(cfg: Configuration) {
     this.storage.remove(cfg.clientID);
+    var authStore = this.storage.get<AuthStore>(cfg.clientID);
   }
 
   private makeStateToken(): string {
@@ -193,8 +207,5 @@ export class AuthService {
     return stateToken;
   }
 
-  // deAuthorize() {
-  //   this.decodeAuth(null);
-  // }
 }          
     

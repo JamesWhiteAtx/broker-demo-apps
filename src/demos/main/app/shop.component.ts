@@ -12,10 +12,10 @@ import { AuthService } from '../../shared/auth.service';
 export class ShopComponent { // implements OnInit
   public constructor(
     private router: Router,
-    private auth: AuthService,
+    private auth: AuthService
     // private products: ProductService,
     // private profile: ProfileService
-    ) {}
+    ) { }
   
   //ngOnInit() {}
 
