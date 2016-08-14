@@ -1,20 +1,14 @@
 import { bootstrap }    from '@angular/platform-browser-dynamic';
-import { HTTP_PROVIDERS } from '@angular/http';
-import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { DEMO_PROVIDERS } from '../../shared/demo.providers';
 import { AppComponent } from './app.component';
-import { ConfigService } from '../../shared/config.service';
-import { AuthService } from '../../shared/auth.service';
 
 bootstrap(AppComponent, [ 
-  HTTP_PROVIDERS, 
-  { provide: LocationStrategy, useClass: HashLocationStrategy },
-  ConfigService, 
-  AuthService 
+  DEMO_PROVIDERS
 ])
-  .then(
-    () => window.console.info( 'Angular finished bootstrapping Cart!' ),
-    (error) => {
-      console.warn( 'Angular was not able to bootstrap Cart application.' );
-      console.error( error );
-    }
-  );
+.then(
+  () => window.console.info( 'Finished bootstrapping Cart!' ),
+  (error) => {
+    console.warn( 'Unable to bootstrap Cart application.' );
+    console.error( error );
+  }
+);
