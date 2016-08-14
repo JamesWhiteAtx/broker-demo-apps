@@ -102,18 +102,17 @@ export class AuthService {
       });
 
     this.config.data$.subscribe(cfg => {
-      this.decodeAuth(cfg, this.loadEncodedValues(cfg));
+      this.decodeAuth(cfg, this.loadAuthStore(cfg));
     });
-    //.unsubscribe();
-
+  
   }
 
   lastAuthUtl() {
     return window.sessionStorage.getItem(AUTH_LAST_URL);
   }
 
-  private decodeAuth(cfg: Configuration, encoded) {
-    var state: AuthState = new AuthState(encoded);
+  private decodeAuth(cfg: Configuration, authStore: AuthStore) {
+    var state: AuthState = new AuthState(authStore.respFrag);
     
     if (state.authorized) {
       window.sessionStorage.setItem(AUTH_VALUES_KEY, state.encoded);
@@ -124,27 +123,26 @@ export class AuthService {
     this._state.next(state);
   }
 
-  private loadEncodedValues(cfg: Configuration): string {
+  private loadAuthStore(cfg: Configuration): AuthStore {
     var searchParams: Object;
     var chash: Object;
+
+    var authStore = this.retrieveAuth(cfg);
     
     searchParams = parseParams(window.location.search);
     if (searchParams) {
       chash = searchParams['chash'];
       if (typeof chash === 'string') {  // there is a chash param
         if (chash.length > 0) {         // the chash has a value
-          return chash;
-        } else {                        // the chash is an empty string, logout
-          return null;                  // the auth values are cleared
+          authStore.respFrag = chash;
         }
       }
     }
 
-    var id = cfg.clientID;
-    var authStore = this.storage.getObject<AuthStore>(id);
-
     // if not return yet, try to read the auth values string from storage 
-    return window.sessionStorage.getItem(AUTH_VALUES_KEY);
+    //return window.sessionStorage.getItem(AUTH_VALUES_KEY);
+
+    return authStore;
   }
 
   private requestAuth() {
@@ -155,11 +153,10 @@ export class AuthService {
       window.sessionStorage.setItem(AUTH_STATE_KEY, stateToken);
       window.sessionStorage.setItem(AUTH_LAST_URL, url);
 
-      var id = cfg.clientID;
       var authStore = new AuthStore();
       authStore.reqState = stateToken;
       authStore.reqUrl = url;
-      this.storage.setObject(id, authStore);
+      this.storeAuth(cfg, authStore);
 
       window.location.assign(url);
     })
@@ -171,10 +168,23 @@ export class AuthService {
     this.config.data$.subscribe(cfg => {
       var stateToken = window.sessionStorage.getItem(AUTH_STATE_KEY);
       var url = cfg.getLogoutUrl(stateToken);
+
+      this.removeAuth(cfg);
+
       window.location.assign(url);
     })
     .unsubscribe();
     return false;
+  }
+
+  private storeAuth(cfg: Configuration, authStore: AuthStore) {
+    this.storage.set(cfg.clientID, authStore);
+  }
+  private retrieveAuth(cfg: Configuration): AuthStore {
+    return this.storage.get<AuthStore>(cfg.clientID);
+  }
+  private removeAuth(cfg: Configuration) {
+    this.storage.remove(cfg.clientID);
   }
 
   private makeStateToken(): string {
