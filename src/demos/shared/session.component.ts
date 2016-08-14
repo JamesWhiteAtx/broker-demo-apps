@@ -8,8 +8,7 @@ import { StorageService, KeyHash } from './storage.service';
 
 @Component({
   selector: 'demo-session',
-  template: `<div>session component template</div>`
-  //templateUrl: 'app/session.component.html',
+  templateUrl: '../shared/session.component.html',
   //styles: ['.session .row {margin-bottom: 10px;}', '.session .title {margin-top: 20px;}'],
   //directives: [JwtComponent]
 })
