@@ -5,6 +5,7 @@
   "LOGOUT_ROUTE": "oauth/logout",
   "CLIENT_REDIRECT_URL": "callback.html",
   "RESPONSE_TYPE": "token id_token",
+  "APP_NAME": "app",
   "CLIENT_ID": "@client@",
   "SCOPES": "openid profile urn:unboundid:scope:manage_profile",
   "ACR_VALUES": "MFA Default"

@@ -8,17 +8,23 @@ import { Jwt } from './jwt'
 import { DecodeComponent, Decoded, LabelDescr } from './decode.component'
 
 export class ClientSession {
+  public open: boolean = false;
   constructor(
     public clientId: string,
     public request: Decoded,
     public response: any) {  
+  }
+  
+  toggle() {
+    this.open = ! this.open;
+    return false;
   } 
 }
 
 @Component({
   selector: 'demo-session',
   templateUrl: '../shared/session.component.html',
-  //styles: ['.session .row {margin-bottom: 10px;}', '.session .title {margin-top: 20px;}'],
+  styles: ['.session .row.section {margin-bottom: 10px;}', '.session .title {margin-top: 20px;}'],
   directives: [DecodeComponent]
 })
 export class SessionComponent {
@@ -27,18 +33,6 @@ export class SessionComponent {
     private auth: AuthService,
     private config: ConfigService,
     private storage: StorageService) {
-    
-    // this.decoded = new Decoded('First of all...', 'gobbleygook',
-    //   [
-    //     {label: 'Secondly', descr: 'two'},
-    //     {label: 'In addition', descr: 'three'},
-    //     new Decoded('As well as..', 'kalfisticticexialidocious', [
-    //       {label: 'Uno', descr: '1'},
-    //       {label: 'Dos', descr: '2'}
-    //     ])
-    //   ]);
-    // this.decoded.kids.push(new Decoded('Secondly'));
-    // this.decoded.kids.push(new Decoded('In addition'));
   }
 
   ngOnInit() {
@@ -50,6 +44,10 @@ export class SessionComponent {
         if (multi) {
           for (let key in multi) {
             this.clients.push(this.decodeStored(key, <AuthStore>multi[key]));
+          }
+
+          if (this.clients.length === 1) {
+            this.clients[0].open = true;
           }
         }
       });

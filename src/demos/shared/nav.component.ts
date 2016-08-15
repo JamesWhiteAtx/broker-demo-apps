@@ -14,6 +14,7 @@ import { ConfigService } from './config.service';
 export class NavComponent implements OnInit {
   brand: Brand;
   authorized: boolean;
+  appName: string;
   authUrl: string;
   logoutUrl: string;
   accountUrl: string;
@@ -36,6 +37,11 @@ export class NavComponent implements OnInit {
           this.title.setTitle( this.brand.title );
         }
       });
+
+    this.config.data$
+      .subscribe(cfg => {
+        this.appName = cfg.appName;
+      });    
 
     this.auth.authorized$
       .subscribe(authorized => {

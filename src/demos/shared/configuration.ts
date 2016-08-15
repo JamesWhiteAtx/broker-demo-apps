@@ -5,6 +5,7 @@ export class Configuration {
   public logoutRoute: string;
   public clientRedirectUrl: string;
   public responseType: string;
+  public appName: string;
   public clientID: string;
   public scopes: string;
   public acrValues: string;

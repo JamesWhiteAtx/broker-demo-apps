@@ -385,6 +385,7 @@ function appCommon() {
     // json
     tasks.push(
       function json() {
+        var rgxAppName = /"APP_NAME".*",/ig;
         var rgxClientId = /"CLIENT_ID".*",/ig;
         var rgxCallback = /"CLIENT_REDIRECT_URL".*",/ig;
         var rgxLogo = /"logo".*"/ig;
@@ -394,6 +395,8 @@ function appCommon() {
               '"logo": "' + images + 'logo.svg"');
           contents = contents.replace(rgxClientId, 
               '"CLIENT_ID": "' + clientId + '",');
+          contents = contents.replace(rgxAppName, 
+              '"APP_NAME": "' + app + '",');
           return contents.replace(rgxCallback, 
               '"CLIENT_REDIRECT_URL": "' + callBackUrl + '",');
         }

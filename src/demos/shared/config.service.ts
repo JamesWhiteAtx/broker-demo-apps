@@ -21,6 +21,7 @@ export class ConfigService {
         cfg.logoutRoute = raw.LOGOUT_ROUTE;
         cfg.clientRedirectUrl = raw.CLIENT_REDIRECT_URL;
         cfg.responseType = raw.RESPONSE_TYPE;
+        cfg.appName = raw.APP_NAME;
         cfg.clientID = raw.CLIENT_ID;
         cfg.scopes = raw.SCOPES;
         cfg.acrValues = raw.ACR_VALUES;

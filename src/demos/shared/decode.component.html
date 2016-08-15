@@ -1,11 +1,11 @@
 <div class="col-sm-3">
+  <label>{{source?.label}}</label>
   <div class="pull-right">
       <a href="#" (click)="toggle()" 
         [attr.title]="showValues ? 'Display encoded string' : 'Display decoded values'"> 
-        <i class="fa" [class.fa-toggle-off]="!showValues" [class.fa-toggle-on]="showValues"></i>
+        <i class="fa" [class.fa-plus]="!showValues" [class.fa-minus]="showValues"></i>
       </a> 
   </div>
-  <label>{{source?.label}}</label>
 </div>
 
 <div class="col-sm-9">
