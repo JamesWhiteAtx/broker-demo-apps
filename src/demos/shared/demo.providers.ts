@@ -5,6 +5,7 @@ import { StorageService } from './storage.service';
 import { AuthService } from './auth.service';
 import { NavComponent } from './nav.component';
 import { BrandingService } from './branding.service';
+import { ProfileService } from './profile.service';
 
 export const DEMO_PROVIDERS = [
   HTTP_PROVIDERS, 
@@ -13,7 +14,8 @@ export const DEMO_PROVIDERS = [
   ConfigService,
   StorageService,
   AuthService,
-  BrandingService
+  BrandingService,
+  ProfileService
 ];
 
 // import { AuthGuard } from './auth-guard.service';

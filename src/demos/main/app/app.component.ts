@@ -10,9 +10,6 @@ import { NavComponent } from '../../shared/nav.component';
   selector: 'main-app',
   template: `
     <demo-nav></demo-nav>
-    <div>main app component template</div>
-    <div class="row"><div class="col-sm-3"><a href="../cart">Cart</a></div><div class="col-sm-3"><a href="../social">Social</a></div></div>
-   
     <router-outlet></router-outlet>
   `,
   directives: [ROUTER_DIRECTIVES, NavComponent],

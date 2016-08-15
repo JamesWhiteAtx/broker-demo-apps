@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
+import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { Jwt } from './jwt';
 import { ConfigService } from './config.service';
@@ -73,34 +75,41 @@ export class AuthState {
           this.idToken.errors.forEach(descr => this.addErr('ID Token', descr));
         }
 
-        this._authorized = this.accessToken.valid;
+        if (authStore.errors && authStore.errors.length) {
+          Array.prototype.push.apply(this.errors, authStore.errors);
+        }
+
+        this._authorized = (this.errors.length === 0) && this.accessToken.valid;
       }
     }
   }
 
   get authorized(): boolean {
-    if (this._authorized) {
-      this._authorized = this.accessToken.valid;
+    if (this._authorized && this.accessToken) {
+      if (!this.accessToken.valid) {
+        this.addErr('Token Error', 'Access Token is not valid');
+      }
+      this._authorized =  (this.errors.length === 0);
     }
     return this._authorized;
   }
 
-  private addErr(error: string, description: string) {
+  public addErr(error: string, description: string) {
     this.errors.push({error: error, description: description});
   }
-  
 } 
 
 export class AuthStore {
   reqUrl: string;
   reqState: string;
   respFrag: string;
+  errors: AuthErr[];
 }
 
 @Injectable()
 export class AuthService {
 
-  private _state: BehaviorSubject<AuthState> = new BehaviorSubject<AuthState>(new AuthState());
+  private _state: ReplaySubject<AuthState> = new ReplaySubject<AuthState>(); //new AuthState()
   public state$: Observable<AuthState> = this._state.asObservable();
   private _authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public authorized$: Observable<boolean> = this._authorized.asObservable().distinctUntilChanged();
@@ -120,10 +129,27 @@ export class AuthService {
     });
   }
 
+  public invalidateToken(err: string) {
+    this.state$.subscribe(state => {
+      state.addErr('Invalid Access Token', err);
+      this._state.next(state);
+    })
+    .unsubscribe();
+  }
+
   private subscribeToStateChange() {
-    this.state$ 
-      .subscribe(state => {
-        var authorized = !!state && !!state.authorized;
+    this.state$
+      .combineLatest(this.config.data$, (state: AuthState, cfg: Configuration) => {
+        return {state: state, cfg: cfg};
+      })
+      .distinctUntilChanged()
+      .subscribe(arg => {
+        var authorized = !!arg.state && !!arg.state.authorized;
+
+        var authStore = this.getStore(arg.cfg);
+        authStore.respFrag = arg.state.respFrag;
+        authStore.errors = arg.state.errors;
+        this.setStore(arg.cfg, authStore);
 
         this._authorized.next(authorized);
         //this._error.next(any errors);
@@ -147,7 +173,7 @@ export class AuthService {
       if (typeof chash === 'string') {  // there is a chash param
         if (chash.length > 0) {         // the chash has a value
           authStore.respFrag = chash;
-          this.setStore(cfg, authStore);
+          delete authStore.errors;
         }
       }
     }

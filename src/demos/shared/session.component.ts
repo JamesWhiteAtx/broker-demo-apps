@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import 'rxjs/add/operator/combineLatest';
-import { AuthService, AuthState, AuthStore } from './auth.service';
-import { ConfigService } from './config.service';
-import { Configuration } from './configuration';
+import { AuthState, AuthStore } from './auth.service';
 import { StorageService, KeyHash } from './storage.service';
 import { Jwt } from './jwt'
 import { DecodeComponent, Decoded, LabelDescr } from './decode.component'
@@ -30,27 +28,21 @@ export class ClientSession {
 export class SessionComponent {
   public clients: ClientSession[] = [];  
   constructor(
-    private auth: AuthService,
-    private config: ConfigService,
     private storage: StorageService) {
   }
 
   ngOnInit() {
-    this.auth.state$
-      .combineLatest(this.config.data$, (state: AuthState, cfg: Configuration) => {})
-      .subscribe(args => {
-        this.clients = [];
-        let multi = this.storage.getMulti();
-        if (multi) {
-          for (let key in multi) {
-            this.clients.push(this.decodeStored(key, <AuthStore>multi[key]));
-          }
+    this.clients = [];
+    let multi = this.storage.getMulti();
+    if (multi) {
+      for (let key in multi) {
+        this.clients.push(this.decodeStored(key, <AuthStore>multi[key]));
+      }
 
-          if (this.clients.length === 1) {
-            this.clients[0].open = true;
-          }
-        }
-      });
+      if (this.clients.length === 1) {
+        this.clients[0].open = true;
+      }
+    }
   }
 
   private decodeStored(id: string, authStore: AuthStore): ClientSession {
@@ -78,6 +70,12 @@ export class SessionComponent {
       this.decodeJwt('Access Token', state.accessToken),
       this.decodeJwt('ID Token', state.idToken)
     ];
+
+    if (state.errors && state.errors.length) {
+      state.errors.forEach(err => {
+        respValues.unshift({label: err.error, descr: err.description});
+      });
+    }
 
     let response = new Decoded('Response', authStore.respFrag, respValues);
 

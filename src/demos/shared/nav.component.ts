@@ -4,6 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { BrandingService, Brand } from './branding.service';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
+import { ProfileService, Profile } from './profile.service';
 
 @Component({
   selector: 'demo-nav',
@@ -18,14 +19,14 @@ export class NavComponent implements OnInit {
   authUrl: string;
   logoutUrl: string;
   accountUrl: string;
-  //profile: Profile;
+  profile: Profile;
 
   public constructor(
     private branding: BrandingService,
     private title: Title,
     private config: ConfigService,
-    private auth: AuthService
-    // private profileService: ProfileService,
+    private auth: AuthService,
+    private proSrvc: ProfileService
     // private cart: CartService
   ) { }
 
@@ -46,6 +47,11 @@ export class NavComponent implements OnInit {
     this.auth.authorized$
       .subscribe(authorized => {
         this.authorized = authorized;
-      });    
+      });
+    
+    this.proSrvc.profile$
+      .subscribe(profile => {
+        this.profile = profile;
+      });
   }
 }
