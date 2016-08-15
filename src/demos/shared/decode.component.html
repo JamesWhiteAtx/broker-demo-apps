@@ -1,0 +1,32 @@
+<div class="col-sm-3">
+  <div class="pull-right">
+      <a href="#" (click)="toggle()" 
+        [attr.title]="showValues ? 'Display encoded string' : 'Display decoded values'"> 
+        <i class="fa" [class.fa-toggle-off]="!showValues" [class.fa-toggle-on]="showValues"></i>
+      </a> 
+  </div>
+  <label>{{source?.label}}</label>
+</div>
+
+<div class="col-sm-9">
+  
+  <div class="row">
+    <div class="col-sm-12" *ngIf="!showValues">
+      <pre>{{source?.encoded}}</pre>
+    </div>
+  </div>
+  
+  <span *ngIf="showValues">
+    <div class="row" *ngFor="let value of source?.values">
+      <span *ngIf="!value.encoded">
+        <div class="col-sm-3"><label>{{value.label}}</label></div>
+        <div class="col-sm-9">{{value.descr}}</div>
+      </span>
+
+      <demo-decoded [source]="value" *ngIf="value.encoded"></demo-decoded>
+    </div>
+  </span>
+
+  <!--<demo-decode *ngFor="let value of source.values" [source]="value"></demo-decode>-->
+
+</div>

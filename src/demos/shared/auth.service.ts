@@ -91,7 +91,7 @@ export class AuthState {
   
 } 
 
-class AuthStore {
+export class AuthStore {
   reqUrl: string;
   reqState: string;
   respFrag: string;

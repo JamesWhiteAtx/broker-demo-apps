@@ -15,6 +15,7 @@ export interface JwtPayload {
   nonce?: string;
   scope?: string;
   sub?: string;
+  amr: string[];
 
   expires: Date;
   issued: Date;
@@ -43,9 +44,9 @@ export class Jwt {
     if (typeof this.payload.exp === 'undefined') {
       this.payload.expires = null;
     } else if (typeof this.payload.exp === 'number') {
-      var expDate = new Date(0);
-      expDate.setUTCSeconds(this.payload.exp);
-      this.payload.expires = expDate;
+      //var expDate = new Date(0);
+      //expDate.setUTCSeconds(this.payload.exp);
+      this.payload.expires = Jwt.dateToString(this.payload.exp);
     } else {
       this.addErr('JWT has invalid expiration date');
     }
@@ -53,9 +54,9 @@ export class Jwt {
     if (typeof this.payload.iat === 'undefined') {
       this.payload.expires = null;
     } else if (typeof this.payload.iat === 'number') {
-      var expDate = new Date(0);
-      expDate.setUTCSeconds(this.payload.iat);
-      this.payload.issued = expDate;
+      // var expDate = new Date(0);
+      // expDate.setUTCSeconds(this.payload.iat);
+      this.payload.issued = Jwt.dateToString(this.payload.iat);
     }
 
     this._valid = true;
@@ -81,5 +82,12 @@ export class Jwt {
   private addErr(description: string) {
     this.errors.push(description);
   }
+
+  static dateToString = function(source: number): Date {
+    var dt = new Date(0);
+    dt.setUTCSeconds(source);
+    return dt;
+  };
+
 
 }

@@ -1,1 +1,19 @@
-<h3>Session template html</h3>
+<div class="container session">
+
+  <div class="row" *ngFor="let client of clients">
+    <hr/>
+    <div class="row">
+      <div class="col-sm-12">
+        <label>Client ID </label> {{client.clientId}}
+      </div>
+    </div>
+    <div class="row">
+      <demo-decoded [source]="client.request"></demo-decoded>
+    </div>
+    <div class="row">
+      <demo-decoded [source]="client.response"></demo-decoded>
+    </div>
+    
+  </div>
+
+</div>
