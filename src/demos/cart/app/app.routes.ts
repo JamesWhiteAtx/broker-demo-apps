@@ -7,7 +7,7 @@ import { AuthGuard } from './auth-guard.service'
 const ROUTES: RouterConfig = [
   {
     path: '',
-    component: ReviewComponent
+    component: ReviewComponent,
   },
   {
     path: 'review',

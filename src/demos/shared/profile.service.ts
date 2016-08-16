@@ -7,10 +7,12 @@ import { AuthService, AuthState } from './auth.service';
 export interface Profile {
   userName: string;
   preferences: any[];
+  displayName: string;
   name: {
     givenName: string,
     formatted: string;
-  }
+  },
+  addresses: any[]
 }
 
 @Injectable()

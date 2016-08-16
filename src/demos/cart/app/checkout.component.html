@@ -1,1 +1,103 @@
-<h2>Checkout</h2>
+<div class="container">
+
+  <h2>Checkout</h2>
+
+  <div class="row">
+    <div class="col-sm-8">
+
+      <div class="row">
+        <div class="col-sm-12">
+          <h4>Shipping Address</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          {{profile?.displayName}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          {{address?.streetAddress}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          {{address?.locality}} {{address?.region}} {{address?.postalCode}}
+        </div>
+      </div>
+      <hr/>
+      <div class="row">
+        <div class="col-sm-12">
+          <h4>Shopping Cart</h4>
+          <demo-items></demo-items>
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="col-sm-4">
+      
+      <div class="row">
+        <div class="col-sm-12">
+          <button type="button" class="btn btn-default btn-block">
+          <span>Place you order</span>
+        </button>
+        </div>
+      </div>
+      <hr/>
+
+      <div class="row">
+        <div class="col-xs-12">
+          <h4>Order Summary</h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xs-7">
+          Items({{qty}}):
+        </div>
+        <div class="col-xs-5 text-right">
+          {{ total | currency:'USD':true }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-7">
+          Shipping & handling:
+        </div>
+        <div class="col-xs-5 text-right">
+          {{ 0 | currency:'USD':true }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-7">
+          Total before tax:
+        </div>
+        <div class="col-xs-5 text-right">
+          {{ total | currency:'USD':true }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-7">
+          Tax:
+        </div>
+        <div class="col-xs-5 text-right">
+          {{ tax | currency:'USD':true }}
+        </div>
+      </div>
+      <hr/>
+      <div class="row">
+        <div class="col-xs-6">
+          <h4>Order Total</h4>
+        </div>
+        <div class="col-xs-6 text-right">
+          <h4>{{ total + tax | currency:'USD':true }}</h4>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+</div>  
+  
