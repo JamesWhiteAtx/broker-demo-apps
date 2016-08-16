@@ -6,7 +6,6 @@ import { Profile, ProfileService } from '../../shared/profile.service';
 
 @Component({
   selector: 'demo-shop',
-  //template: `<h1>shop component template</h1>`
   templateUrl: 'app/shop.component.html'
 })
 

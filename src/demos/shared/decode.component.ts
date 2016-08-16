@@ -21,7 +21,6 @@ export class Decoded implements HasLabel {
 @Component({
   selector: 'demo-decoded',
   templateUrl: '../shared/decode.component.html',
-  //styles: ['.session .row {margin-bottom: 10px;}', '.session .title {margin-top: 20px;}'],
   directives: [DecodeComponent]
 })
 export class DecodeComponent {

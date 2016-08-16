@@ -115,6 +115,24 @@ body {
       }
     }
   }
+  .community {
+    .from {
+      margin : 5px 0 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      .sent {
+        margin-bottom: 5px;
+      }
+    }
+    .me {
+      background-color:#3fa8f4;
+      color: white;
+    }
+    .you {
+      background-color: #e8e8e8;
+      color: black;
+    }
+  }
 }
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {

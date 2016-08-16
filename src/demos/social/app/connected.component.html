@@ -1,0 +1,21 @@
+<h3>Your latest conversation...</h3>
+
+<span *ngFor="let message of messages">
+  <div class="row" *ngIf="! message.from">
+    <div class="col-xs-offset-2 col-xs-10">
+      <div class="from me">
+        <div class="sent">{{ message.sent | date:'medium' }} - {{user}}</div>
+        <div class="msg">{{message.msg}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="message.from">
+    <div class="col-xs-10">
+      <div class="from you">
+        <div class="sent">{{ message.sent | date:'medium' }} - {{message.from}}</div>
+        <div class="msg">{{message.msg}}</div>
+      </div>
+    </div>
+  </div>
+</span>
+
