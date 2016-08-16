@@ -1,8 +1,6 @@
 <div class="container reviewing">
-  <h1>Shopping Cart</h1>
-
+  <h3>Shopping Cart</h3>
   <div class="row product" *ngFor="let item of items">
-
     <div class="col-xs-10 col-sm-11">
       <div class="row details">
         <div class="col-sm-6 clearfix img">
@@ -42,9 +40,7 @@
         <span class="fa fa-remove fa-lg" title="remove"></span>
       </h4>
     </div>
-
   </div>
-
 
   <div class="row total" *ngIf="items.length">
     <div class="col-xs-10 col-sm-11">
@@ -76,7 +72,8 @@
 
   <div class="row controls" *ngIf="qty">
     <div class="col-sm-offset-6 col-sm-6 col-md-offset-8 col-md-4">
-      <button type="button" class="btn btn-default btn-lg btn-block">
+      <button type="button" class="btn btn-default btn-lg btn-block"
+        (click)="checkout()">
         <span>Proceed to Checkout</span>
         <span class="fa fa-chevron-right" title="remove"></span>
       </button>

@@ -1,6 +1,8 @@
 import { provideRouter, RouterConfig }  from '@angular/router';
 import { ReviewComponent } from './review.component';
+import { CheckoutComponent } from './checkout.component';
 import { SessionComponent } from '../../shared/session.component';
+import { AuthGuard } from './auth-guard.service'
 
 const ROUTES: RouterConfig = [
   {
@@ -10,6 +12,11 @@ const ROUTES: RouterConfig = [
   {
     path: 'review',
     component: ReviewComponent
+  },
+  {
+    path: 'checkout',
+    component: CheckoutComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'session',

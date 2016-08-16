@@ -185,7 +185,7 @@ export class AuthService {
     return authStore;
   }
 
-  private requestAuth() {
+  public requestAuth() {
     var stateToken = this.makeStateToken();
     
     this.config.data$.subscribe(cfg => {
@@ -203,7 +203,7 @@ export class AuthService {
     return false;
   }
 
-  private logout() {
+  public logout() {
     this.config.data$.subscribe(cfg => {
 
       var authStore = this.getStore(cfg);
