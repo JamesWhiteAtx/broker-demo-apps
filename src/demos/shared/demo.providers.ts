@@ -6,6 +6,8 @@ import { AuthService } from './auth.service';
 import { NavComponent } from './nav.component';
 import { BrandingService } from './branding.service';
 import { ProfileService } from './profile.service';
+import { ProductService } from './product.service';
+import { CartService } from './cart.service';
 
 export const DEMO_PROVIDERS = [
   HTTP_PROVIDERS, 
@@ -15,8 +17,8 @@ export const DEMO_PROVIDERS = [
   StorageService,
   AuthService,
   BrandingService,
-  ProfileService
+  ProfileService,
+  ProductService,
+  CartService
 ];
 
-// import { AuthGuard } from './auth-guard.service';
-  //AuthGuard,

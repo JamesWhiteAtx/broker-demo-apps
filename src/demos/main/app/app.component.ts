@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
 import { NavComponent } from '../../shared/nav.component';
-//import { BrandingService } from '../../shared/branding.service';
-// import { ProductService } from './product.service';
-// import { ProfileService } from './profile.service';
-// import { CartService } from './cart.service';
 
 @Component({
   selector: 'main-app',
@@ -12,9 +8,6 @@ import { NavComponent } from '../../shared/nav.component';
     <demo-nav></demo-nav>
     <router-outlet></router-outlet>
   `,
-  directives: [ROUTER_DIRECTIVES, NavComponent],
-  //providers: [BrandingService
-  //, ProductService, ProfileService, CartService
-  //]
+  directives: [ROUTER_DIRECTIVES, NavComponent]
 })
 export class AppComponent {}
