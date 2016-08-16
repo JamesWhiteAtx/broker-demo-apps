@@ -17,6 +17,10 @@
   </div>
   
   <span *ngIf="showValues">
+    <div class="row text-danger" *ngFor="let error of source?.errors">
+      <div class="col-sm-3"><label>{{error.label}}</label></div>
+      <div class="col-sm-9">{{error.descr}}</div>
+    </div>
     <div class="row" *ngFor="let value of source?.values">
       <span *ngIf="!value.encoded">
         <div class="col-sm-3"><label>{{value.label}}</label></div>
@@ -26,7 +30,5 @@
       <demo-decoded [source]="value" *ngIf="value.encoded"></demo-decoded>
     </div>
   </span>
-
-  <!--<demo-decode *ngFor="let value of source.values" [source]="value"></demo-decode>-->
 
 </div>

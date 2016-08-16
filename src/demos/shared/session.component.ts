@@ -22,7 +22,8 @@ export class ClientSession {
 @Component({
   selector: 'demo-session',
   templateUrl: '../shared/session.component.html',
-  styles: ['.session .row.section {margin-bottom: 10px;}', '.session .title {margin-top: 20px;}'],
+  styles: ['.session.container {padding-top: 30px;}', 
+    '.session .row.section {margin-top: 5px;}'],
   directives: [DecodeComponent]
 })
 export class SessionComponent {
@@ -36,7 +37,10 @@ export class SessionComponent {
     let multi = this.storage.getMulti();
     if (multi) {
       for (let key in multi) {
-        this.clients.push(this.decodeStored(key, <AuthStore>multi[key]));
+        let client = this.decodeStored(key, <AuthStore>multi[key]);
+        if (client) {
+          this.clients.push(client);
+        }
       }
 
       if (this.clients.length === 1) {
@@ -46,40 +50,52 @@ export class SessionComponent {
   }
 
   private decodeStored(id: string, authStore: AuthStore): ClientSession {
+    let request: Decoded;
+    let state: AuthState;
+    let response: Decoded;
+    let sess: ClientSession;
+
     // Request
-    let req = 'endpoint=' + authStore.reqUrl;
-    var reqValues = req.split(/[?&]/g)
-      .map(seg => {
-        var arr = seg.split('=');
-        return {
-          label: arr[0], 
-          descr: arr[1] ? decodeURIComponent(arr[1]) : null
-        };
-      });
+    if (authStore.reqUrl) {
+      let url = 'endpoint=' + authStore.reqUrl;
+      var reqValues = url.split(/[?&]/g)
+        .map(seg => {
+          var arr = seg.split('=');
+          return {
+            label: arr[0], 
+            descr: arr[1] ? decodeURIComponent(arr[1]) : null
+          };
+        });
 
-    let request = new Decoded('Request', authStore.reqUrl, reqValues);
-
-    // Response
-    let state = new AuthState(authStore);
-
-    let respValues = [
-      {label: 'Token Type', descr: state.respParams.token_type},
-      {label: 'Duration', descr: this.secondsToHms(state.respParams.expires_in)},
-      {label: 'Scope', descr: state.respParams.scope},
-      {label: 'State', descr: state.respParams.state},
-      this.decodeJwt('Access Token', state.accessToken),
-      this.decodeJwt('ID Token', state.idToken)
-    ];
-
-    if (state.errors && state.errors.length) {
-      state.errors.forEach(err => {
-        respValues.unshift({label: err.error, descr: err.description});
-      });
+      request = new Decoded('Request', authStore.reqUrl, reqValues);
     }
 
-    let response = new Decoded('Response', authStore.respFrag, respValues);
+    // Response
+    if (authStore.respFrag) {
+      state = new AuthState(authStore);
 
-    let sess = new ClientSession(id, request, response);
+      let respValues = [
+        {label: 'Token Type', descr: state.respParams.token_type},
+        {label: 'Duration', descr: this.secondsToHms(state.respParams.expires_in)},
+        {label: 'Scope', descr: state.respParams.scope},
+        {label: 'State', descr: state.respParams.state},
+        this.decodeJwt('Access Token', state.accessToken),
+        this.decodeJwt('ID Token', state.idToken)
+      ];
+
+      let errors = [];
+      if (state.errors && state.errors.length) {
+        state.errors.forEach(err => {
+          errors.push({label: err.error, descr: err.description});
+        });
+      }
+
+      response = new Decoded('Response', authStore.respFrag, respValues, errors);
+    }
+    
+    if (request || response) {
+      sess = new ClientSession(id, request, response);
+    }
     return sess;
   }
   

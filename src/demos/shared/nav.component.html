@@ -65,3 +65,12 @@
 
   </div>
 </nav>
+<div class="container errors" *ngIf="errors && errors?.length">
+  <p></p>
+  <div class="alert alert-danger" role="alert" *ngFor="let error of errors">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+      </button>
+      <strong>{{error.error}}</strong> {{error.description}}
+  </div>
+</div>

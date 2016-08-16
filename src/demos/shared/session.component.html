@@ -5,7 +5,6 @@
   </div>
 
   <div class="row" *ngFor="let client of clients">
-    <hr/>
     <div class="row section">
       <div class="col-sm-2">
         <a href="#" (click)="client.toggle()" 
@@ -24,7 +23,7 @@
     <div class="row section" *ngIf="client.open">
       <demo-decoded [source]="client.response"></demo-decoded>
     </div>
-    
+    <hr/>
   </div>
 
 </div>

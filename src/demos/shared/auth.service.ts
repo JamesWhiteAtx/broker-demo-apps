@@ -58,21 +58,21 @@ export class AuthState {
 
         // check for response errors
         if (this.respParams.error) {
-          this.addErr(this.respParams.error, this.respParams.error_description);
+          this.addAuthErr(this.respParams.error, this.respParams.error_description);
         }
 
         // compare state  
         if (authStore.reqState != this.respParams.state) {
-          this.addErr('State', 'Request state (' + authStore.reqState +
+          this.addAuthErr('State', 'Request state (' + authStore.reqState +
             ') does not match response state (' + this.respParams.state + ').');
         }
 
         this.accessToken = new Jwt(this.respParams.access_token);
-        this.accessToken.errors.forEach(descr => this.addErr('Access Token', descr));
+        this.accessToken.errors.forEach(descr => this.addAuthErr('Access Token', descr));
 
         if (this.respParams.id_token) {
           this.idToken = new Jwt(this.respParams.id_token);
-          this.idToken.errors.forEach(descr => this.addErr('ID Token', descr));
+          this.idToken.errors.forEach(descr => this.addAuthErr('ID Token', descr));
         }
 
         if (authStore.errors && authStore.errors.length) {
@@ -87,14 +87,14 @@ export class AuthState {
   get authorized(): boolean {
     if (this._authorized && this.accessToken) {
       if (!this.accessToken.valid) {
-        this.addErr('Token Error', 'Access Token is not valid');
+        this.addAuthErr('Token Error', 'Access Token is not valid');
       }
       this._authorized =  (this.errors.length === 0);
     }
     return this._authorized;
   }
 
-  public addErr(error: string, description: string) {
+  public addAuthErr(error: string, description: string) {
     this.errors.push({error: error, description: description});
   }
 } 
@@ -109,10 +109,14 @@ export class AuthStore {
 @Injectable()
 export class AuthService {
 
-  private _state: ReplaySubject<AuthState> = new ReplaySubject<AuthState>(); //new AuthState()
+  private _state: ReplaySubject<AuthState> = new ReplaySubject<AuthState>();
   public state$: Observable<AuthState> = this._state.asObservable();
+
   private _authorized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public authorized$: Observable<boolean> = this._authorized.asObservable().distinctUntilChanged();
+
+  private _error: ReplaySubject<AuthErr[]> = new ReplaySubject<AuthErr[]>();
+  public error$: Observable<AuthErr[]> = this._error.asObservable().distinctUntilChanged();
 
   private responseSearch: string;
 
@@ -131,7 +135,7 @@ export class AuthService {
 
   public invalidateToken(err: string) {
     this.state$.subscribe(state => {
-      state.addErr('Invalid Access Token', err);
+      state.addAuthErr('Invalid Access Token', err);
       this._state.next(state);
     })
     .unsubscribe();
@@ -152,7 +156,7 @@ export class AuthService {
         this.setStore(arg.cfg, authStore);
 
         this._authorized.next(authorized);
-        //this._error.next(any errors);
+        this._error.next(arg.state.errors);
       });
   }
 

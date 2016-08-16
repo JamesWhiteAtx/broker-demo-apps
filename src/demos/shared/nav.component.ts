@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { BrandingService, Brand } from './branding.service';
-import { AuthService } from './auth.service';
+import { AuthService, AuthErr } from './auth.service';
 import { ConfigService } from './config.service';
 import { ProfileService, Profile } from './profile.service';
 
@@ -20,6 +20,7 @@ export class NavComponent implements OnInit {
   logoutUrl: string;
   accountUrl: string;
   profile: Profile;
+  errors: AuthErr[];
 
   public constructor(
     private branding: BrandingService,
@@ -47,6 +48,11 @@ export class NavComponent implements OnInit {
     this.auth.authorized$
       .subscribe(authorized => {
         this.authorized = authorized;
+      });
+
+    this.auth.error$
+      .subscribe(errs => {
+        this.errors = errs;
       });
     
     this.proSrvc.profile$

@@ -13,7 +13,8 @@ export class Decoded implements HasLabel {
   constructor(
     public label: string,
     public encoded: string,
-    public values: (LabelDescr | Decoded)[] = []) {   
+    public values: (LabelDescr | Decoded)[] = [],
+    public errors?: LabelDescr[]) {   
   }  
 }
 
