@@ -1,7 +1,7 @@
 <div class="container reviewing">
   <h1>Shopping Cart</h1>
 
-  <div class="row product" *ngFor="let item of cart.items$ | async">
+  <div class="row product" *ngFor="let item of items">
 
     <div class="col-xs-10 col-sm-11">
       <div class="row details">
@@ -42,9 +42,11 @@
         <span class="fa fa-remove fa-lg" title="remove"></span>
       </h4>
     </div>
+
   </div>
 
-  <div class="row total" *ngIf="(cart.items$ | async).length">
+
+  <div class="row total" *ngIf="items.length">
     <div class="col-xs-10 col-sm-11">
       <div class="row">
         <div class="col-sm-6">
@@ -53,11 +55,11 @@
         <div class="col-sm-6">
           <div class="row">
             <div class="col-xs-offset-4 col-xs-4 text-center qty">
-              <h4>{{ cart.qty }}</h4>
+              <h4> {{ qty }}</h4>
             </div>
             <div class="col-xs-4 text-right total">
               <h4 class="price">
-                {{ cart.total$ | async | currency:'USD':true }}
+                {{ total | currency:'USD':true }}
               </h4>
             </div>
           </div>
@@ -66,13 +68,13 @@
     </div>    
   </div>
 
-  <div class="row" *ngIf="!(cart.items$ | async).length">
+  <div class="row" *ngIf="! items.length">
     <div class="col-sm-12">
       <h4>Your Cart Is Empty</h4>
     </div>
   </div>
 
-  <div class="row controls" *ngIf="cart.qty$ | async">
+  <div class="row controls" *ngIf="qty">
     <div class="col-sm-offset-6 col-sm-6 col-md-offset-8 col-md-4">
       <button type="button" class="btn btn-default btn-lg btn-block">
         <span>Proceed to Checkout</span>

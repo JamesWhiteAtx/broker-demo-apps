@@ -5,6 +5,7 @@ import { BrandingService, Brand } from './branding.service';
 import { AuthService, AuthErr } from './auth.service';
 import { ConfigService } from './config.service';
 import { ProfileService, Profile } from './profile.service';
+import { CartService } from './cart.service';
 
 @Component({
   selector: 'demo-nav',
@@ -27,8 +28,8 @@ export class NavComponent implements OnInit {
     private title: Title,
     private config: ConfigService,
     private auth: AuthService,
-    private proSrvc: ProfileService
-    // private cart: CartService
+    private proSrvc: ProfileService,
+    private cart: CartService
   ) { }
 
   ngOnInit() { 

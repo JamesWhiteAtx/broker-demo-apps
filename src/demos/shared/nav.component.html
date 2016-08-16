@@ -50,7 +50,13 @@
         <li>
           <a [href]="(appName == 'cart') ? '#' : '../cart'" title="Checkout">
             <i class="fa fa-shopping-cart fa-lg"></i>
-            <span class="visible-xs-inline visible-lg-inline visible-md-inline">Checkout</span>
+            <span class="visible-xs-inline visible-lg-inline visible-md-inline">Cart</span>
+            
+            <span *ngIf="cart.qty$ | async">  
+              (<span class="cart-val">{{cart.qty$ | async}}</span>)
+              <span class="cart-val">{{ cart.total$ | async | currency:'USD':true }}</span>
+            </span>
+
           </a>
         </li>
 

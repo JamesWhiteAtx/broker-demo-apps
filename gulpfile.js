@@ -382,9 +382,9 @@ function appCommon() {
       }
     );
 
-    // json
+    // app json
     tasks.push(
-      function json() {
+      function appJson() {
         var rgxAppName = /"APP_NAME".*",/ig;
         var rgxClientId = /"CLIENT_ID".*",/ig;
         var rgxCallback = /"CLIENT_REDIRECT_URL".*",/ig;
@@ -402,11 +402,21 @@ function appCommon() {
         }
 
         return gulp
-          .src(cfg.src.common + '*.json')
+          .src([cfg.src.common + 'config.json', cfg.src.common + 'brand.json'])
           .pipe($.insert.transform(replaceVals))
           .pipe(gulp.dest(cfg.dist.path + app));    
       }
     );
+
+    // shared json
+    tasks.push(
+      function sharedJson() {
+        return gulp
+          .src(cfg.src.common + 'products.json')
+          .pipe(gulp.dest(cfg.dist.path + sharedPath));    
+      }
+    );
+
 
     // dsconfig
     tasks.push(

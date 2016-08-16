@@ -37,11 +37,11 @@ export class StorageService {
     this.setObject(MULTI_STORE_KEY, multi);
   }
 
-  private setObject(key: string, obj: Object): void {
+  setObject(key: string, obj: Object): void {
     this.window.sessionStorage.setItem(key, JSON.stringify(obj));
   }
 
-  private getObject<T>(key: string): T {
+  getObject<T>(key: string): T {
     let result: T = null;
 
     let stored = this.window.sessionStorage.getItem(key);

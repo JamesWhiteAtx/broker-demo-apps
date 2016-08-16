@@ -8,7 +8,7 @@ bootstrap(AppComponent, [
   DEMO_PROVIDERS
 ])
 .then(
-  () => window.console.info( 'Finished bootstrapping Socail!' ),
+  () => window.console.info( 'Finished bootstrapping Social!' ),
   (error) => {
     console.warn( 'Unable to bootstrap Social application.' );
     console.error( error );

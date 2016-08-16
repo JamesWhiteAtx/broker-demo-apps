@@ -27,19 +27,20 @@ class ProdData {
   general: Group[];
   products: Product[];
 
-  constructor(raw: any) {
+  constructor(raw: any, relativeUrl: string) {
     this.preferences = raw.preferences;
     this.general = raw.general;
 
     this.products = [];
-    this.addGroupProds(this.preferences);
-    this.addGroupProds(this.general);
+    this.addGroupProds(this.preferences, relativeUrl);
+    this.addGroupProds(this.general, relativeUrl);
   }
 
-  private addGroupProds(groups: Group[]) {
+  private addGroupProds(groups: Group[], relativeUrl: string) {
     groups.forEach(group => {
       group.products.forEach(product => {
         product.price = +product.price;
+        product.img = relativeUrl + product.img;
         this.products.push(product);
       });
     });
@@ -59,9 +60,10 @@ export class ProductService {
     private http: Http, 
     private profileService: ProfileService) {
 
-    this.http.get('config/products.json')
+    let relativeUrl = '../shared/';
+    this.http.get(relativeUrl + 'products.json')
       .map<ProdData>(response => {
-        return new ProdData(response.json());
+        return new ProdData(response.json(), relativeUrl);
       })
       .subscribe(data => {
         this._data.next(data);
