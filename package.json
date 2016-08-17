@@ -10,7 +10,7 @@
   },
   "license": "ISC",
   "scripts": {
-    "lite": "lite-server"
+    "release": "./node_modules/.bin/gulp release --base demos/apps"
   },
   "dependencies": {
     "@angular/common": "2.0.0-rc.4",

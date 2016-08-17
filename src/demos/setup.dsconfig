@@ -1,0 +1,15 @@
+#
+# This dsconfig batch file creates the Data Broker 
+# Demonstration HTTP Servlet Extension.
+#
+# dsconfig -n --batch-file setup.dsconfig
+
+dsconfig create-http-servlet-extension \
+    --extension-name Demonstration \
+    --type file-server \
+    --set base-context-path:/demo \
+    --set document-root-directory:demo
+
+dsconfig set-connection-handler-prop \
+    --handler-name "HTTPS Connection Handler"  \
+    --add http-servlet-extension:Demonstration

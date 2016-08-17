@@ -822,8 +822,9 @@ gulp.task('serve:reload', gulp.series(
 
 gulp.task('release', gulp.series(
     clean,
-    build
+    build,
+    settings
 ));
 
-// /Users/jameswhite/Source/deploy/ib2/docs/demo/';
-// gulp serve:reload --dist /Users/jameswhite/Source/deploy/ib2/docs/demos  --base docs/demos
+// gulp serve:reload --dist <broker dir>/docs/demos  --base docs/demos
+// --dist <broker dir>/demo/apps  --base demo/apps
