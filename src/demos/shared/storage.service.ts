@@ -8,7 +8,11 @@ export class KeyHash {
 
 @Injectable()
 export class StorageService {
-  constructor(@Inject('Window') private window: Window) { }
+  private storage: Storage;
+
+  constructor(@Inject('Window') private window: Window) {
+    this.storage = window.localStorage || window.sessionStorage;
+  }
 
   set(key: string, obj: Object) {
     this.setMultiVal(key, obj);
@@ -38,13 +42,13 @@ export class StorageService {
   }
 
   setObject(key: string, obj: Object): void {
-    this.window.sessionStorage.setItem(key, JSON.stringify(obj));
+    this.storage.setItem(key, JSON.stringify(obj));
   }
 
   getObject<T>(key: string): T {
     let result: T = null;
 
-    let stored = this.window.sessionStorage.getItem(key);
+    let stored = this.storage.getItem(key);
 
     if (typeof stored === 'string') {     // If there is a stored string value retrieved...
       result = <T>JSON.parse(stored);     // convert from JSON to an object.
