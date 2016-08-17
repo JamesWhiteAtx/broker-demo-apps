@@ -826,4 +826,4 @@ gulp.task('release', gulp.series(
 ));
 
 // /Users/jameswhite/Source/deploy/ib2/docs/demo/';
-// gulp serve:reload --dist /Users/jameswhite/Source/deploy/ib2/docs/demo  --base docs/demo
+// gulp serve:reload --dist /Users/jameswhite/Source/deploy/ib2/docs/demos  --base docs/demos

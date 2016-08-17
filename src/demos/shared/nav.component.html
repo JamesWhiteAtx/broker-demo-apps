@@ -34,24 +34,21 @@
         </li>
 
         <li *ngIf="appName != 'main'">
-          <a href="../main" 
-            data-toggle="collapse" data-target=".navbar-collapse" title="Main">
+          <a href="../main" title="Main">
             <i class="fa fa-home fa-lg"></i>
             <span class="visible-xs-inline visible-lg-inline visible-md-inline">Main</span>
           </a>
         </li>
 
         <li *ngIf="appName != 'social'">
-          <a href="../social" 
-            data-toggle="collapse" data-target=".navbar-collapse" title="Community">
+          <a href="../social" title="Community">
             <i class="fa fa-share-alt fa-lg"></i>
             <span class="visible-xs-inline visible-lg-inline visible-md-inline">Community</span>
           </a>
         </li>
 
         <li>
-          <a [href]="(appName == 'cart') ? '#' : '../cart'" 
-            data-toggle="collapse" data-target=".navbar-collapse" title="Checkout">
+          <a [href]="(appName == 'cart') ? '#' : '../cart'" title="Checkout">
             <i class="fa fa-shopping-cart fa-lg"></i>
             <span class="visible-xs-inline visible-lg-inline visible-md-inline">Cart</span>
             
@@ -64,10 +61,14 @@
         </li>
 
         <li routerLinkActive="active">
-          <a routerLink="/session" 
+          <a routerLink="/session" title="My Account" class="hidden-xs">
+            <i class="fa fa-key"></i> Session
+          </a>
+          <a routerLink="/session" class="visible-xs-block"
             data-toggle="collapse" data-target=".navbar-collapse" title="My Account">
             <i class="fa fa-key"></i> Session
           </a>
+
         </li>
 
       </ul>
