@@ -1,13 +1,14 @@
 <div class="container">
   <h3>Shopping Cart</h3>
-  <demo-items></demo-items>
 
+  <demo-items [totals]="true"></demo-items>
 
   <div class="row controls" *ngIf="qty">
     <div class="col-sm-offset-6 col-sm-6 col-md-offset-8 col-md-4">
       <button type="button" class="btn btn-default btn-lg btn-block"
         (click)="checkout()">
-        <span>Proceed to Checkout</span>
+        <span *ngIf="authorized">Proceed to Checkout</span>
+        <span *ngIf="! authorized">Sign In for Checkout</span>
         <span class="fa fa-chevron-right" title="remove"></span>
       </button>
     </div>

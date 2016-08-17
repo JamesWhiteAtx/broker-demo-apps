@@ -10,6 +10,7 @@ import { ItemsComponent } from './items.component';
   directives: [ItemsComponent]
 })
 export class ReviewComponent implements OnInit {
+  public authorized: boolean = false;
   public qty: number = 0;
   
   constructor(
@@ -27,6 +28,7 @@ export class ReviewComponent implements OnInit {
   checkout() {
     this.auth.authorized$
       .subscribe(authorized => {
+        this.authorized = authorized;
         if (authorized) {
           this.router.navigate(['/checkout']);
         } else {

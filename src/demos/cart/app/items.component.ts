@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CartService, Item } from '../../shared/cart.service';
 import { AuthService } from '../../shared/auth.service';
 
@@ -10,6 +10,8 @@ export class ItemsComponent implements OnInit {
   public items: Item[] = [];
   public total: number = 0;
   public qty: number = 0;
+
+  @Input() totals: boolean = false;
 
   constructor(
     private auth: AuthService,
