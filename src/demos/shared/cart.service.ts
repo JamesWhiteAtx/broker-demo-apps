@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { ProfileService } from './profile.service';
 import { ProductService, Product } from './product.service';
+import { StorageService } from './storage.service';
 
 export interface Item extends Product {
   qty: number;
@@ -20,7 +21,7 @@ const CART_KEY = 'demo_cart';
 
 @Injectable()
 export class CartService {
-  private _items: BehaviorSubject<Item[]> = new BehaviorSubject<Item[]>([]);
+  private _items: BehaviorSubject<Item[]> = new BehaviorSubject<Item[]>(null);
   public items$: Observable<Item[]> = this._items.asObservable();
   private _qty: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   public qty$: Observable<number> = this._qty.asObservable();
@@ -32,7 +33,8 @@ export class CartService {
   
   constructor(
     private profileService: ProfileService,
-    private products: ProductService) {
+    private products: ProductService,
+    private storage: StorageService) {
 
     this.profileService.profile$.distinctUntilChanged()
       .subscribe(profile => {
@@ -47,9 +49,11 @@ export class CartService {
       });
     
     this.items$.subscribe(items => {
-      this.updateStored(items);
-      this.updateQty(items);
-      this.updateTotal(items);
+      if (items) {
+        this.updateStored(items);
+        this.updateQty(items);
+        this.updateTotal(items);
+      }
     });
   }
 
@@ -88,20 +92,16 @@ export class CartService {
   }
 
   private getStoredCart(): CartData {
-    var serialized = window.sessionStorage.getItem(CART_KEY);
-    var stored = (serialized) ? <CartData>JSON.parse(serialized) : <CartData>{};
+    var stored = this.storage.getObject<CartData>(CART_KEY) || <CartData>{};
     stored.items = stored.items || [];
     return stored;
   }
 
 	private updateStored(items: Item[]) {
-    var serialized = window.sessionStorage.getItem(CART_KEY);
-    var stored = this.getStoredCart();
-
+    var stored = this.storage.getObject<CartData>(CART_KEY) || <CartData>{};
     stored.last = this.user || stored.last;
     stored.items = items;
-
-    window.sessionStorage.setItem(CART_KEY, JSON.stringify(stored));
+    this.storage.setObject(CART_KEY, stored);
   }
   
   private updateQty(items: Item[]) {

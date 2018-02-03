@@ -1,0 +1,24 @@
+#
+# This dsconfig batch file creates the Broker {{name}} Demo OAuth2 Client within the
+# Data Broker.
+#
+
+dsconfig create-oauth2-client \
+    --client-name "Broker {{name}} Demo" \
+    --set "description:Broker {{name}} Demo sample web app." \
+    --set "client-id:{{clientid}}" \
+    --set grant-type:implicit \
+    --set url:{{url}} \
+    --set redirect-url:{{callback}}
+
+dsconfig create-permitted-scope \
+    --client-name "Broker {{name}} Demo" \
+    --scope-name openid
+
+dsconfig create-permitted-scope \
+    --client-name "Broker {{name}} Demo" \
+    --scope-name profile
+
+dsconfig create-permitted-scope \
+    --client-name "Broker {{name}} Demo" \
+    --scope-name urn:unboundid:scope:manage_profile

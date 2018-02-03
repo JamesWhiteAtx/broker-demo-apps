@@ -1,0 +1,29 @@
+<div class="container session">
+  
+  <div class="row section" *ngIf="! clients?.length">
+    <h3>No Client Session Information</h3>
+  </div>
+
+  <div class="row" *ngFor="let client of clients">
+    <div class="row section">
+      <div class="col-sm-2">
+        <a href="#" (click)="client.toggle()" 
+        [attr.title]="client.open ? 'Show session values' : 'Hide session values'"> 
+        <i class="fa" [class.fa-plus]="!client.open" [class.fa-minus]="client.open"></i>
+        </a>
+        <label>Client ID </label>
+      </div>
+      <div class="col-sm-10">
+        {{client.clientId}}
+      </div>
+    </div>
+    <div class="row section" *ngIf="client.open">
+      <demo-decoded [source]="client.request"></demo-decoded>
+    </div>
+    <div class="row section" *ngIf="client.open">
+      <demo-decoded [source]="client.response"></demo-decoded>
+    </div>
+    <hr/>
+  </div>
+
+</div>

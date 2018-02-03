@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ROUTER_DIRECTIVES } from '@angular/router';
-import { ProductService, Product } from './product.service';
-import { CartService, Item } from './cart.service';
+import { ProductService, Product } from '../../shared/product.service';
+import { CartService, Item } from '../../shared/cart.service';
 
 @Component({
   selector: 'demo-shop',
@@ -18,6 +18,7 @@ export class BuyComponent implements OnInit {
     private route: ActivatedRoute,
     private products: ProductService,
     private cart: CartService) {
+      
   }
 
   ngOnInit() {

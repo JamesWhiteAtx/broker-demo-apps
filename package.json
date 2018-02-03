@@ -10,8 +10,8 @@
   },
   "license": "ISC",
   "scripts": {
-    "lite": "lite-server",
-    "dummy" : "nonsense"
+    "release": "./node_modules/.bin/gulp release --base demos/apps",
+    "postinstall": "typings install"
   },
   "dependencies": {
     "@angular/common": "2.0.0-rc.4",

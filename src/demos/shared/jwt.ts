@@ -15,6 +15,7 @@ export interface JwtPayload {
   nonce?: string;
   scope?: string;
   sub?: string;
+  amr: string[];
 
   expires: Date;
   issued: Date;
@@ -24,15 +25,17 @@ export class Jwt {
   encoded: string;
   header: JwtHeader;
   payload: JwtPayload;
+  errors: string[];
   private _valid: boolean = false;
 
   constructor(encoded: string) {
     var parts: string[];
-    
+    this.errors = [];
+   
     this.encoded = encoded;
     parts = this.encoded.split('.');
     if (parts.length !== 3) {
-      throw new Error('JWT must have 3 parts');
+      this.addErr('JWT must have 3 parts');
     }
 
     this.header = <JwtHeader>JSON.parse(atob(parts[0]));
@@ -41,28 +44,30 @@ export class Jwt {
     if (typeof this.payload.exp === 'undefined') {
       this.payload.expires = null;
     } else if (typeof this.payload.exp === 'number') {
-      var expDate = new Date(0);
-      expDate.setUTCSeconds(this.payload.exp);
-      this.payload.expires = expDate;
+      //var expDate = new Date(0);
+      //expDate.setUTCSeconds(this.payload.exp);
+      this.payload.expires = Jwt.dateToString(this.payload.exp);
     } else {
-      throw new Error('JWT has invalid expiration date');
+      this.addErr('JWT has invalid expiration date');
     }
 
     if (typeof this.payload.iat === 'undefined') {
       this.payload.expires = null;
     } else if (typeof this.payload.iat === 'number') {
-      var expDate = new Date(0);
-      expDate.setUTCSeconds(this.payload.iat);
-      this.payload.issued = expDate;
+      // var expDate = new Date(0);
+      // expDate.setUTCSeconds(this.payload.iat);
+      this.payload.issued = Jwt.dateToString(this.payload.iat);
     }
-
 
     this._valid = true;
   }
 
   get valid(): boolean {
     if (this._valid) {
-      this._valid = ! this.expired();
+      if (this.expired()) {
+        this.addErr('token has expired');
+      }
+      this._valid =  (this.errors.length === 0);
     }
     return this._valid;
   }
@@ -73,5 +78,16 @@ export class Jwt {
     }
     return Date.now() > this.payload.expires.valueOf();
   }
+
+  private addErr(description: string) {
+    this.errors.push(description);
+  }
+
+  static dateToString = function(source: number): Date {
+    var dt = new Date(0);
+    dt.setUTCSeconds(source);
+    return dt;
+  };
+
 
 }

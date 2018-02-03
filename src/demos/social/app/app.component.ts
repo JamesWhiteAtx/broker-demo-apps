@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
+import { NavComponent } from '../../shared/nav.component';
 
 @Component({
-  selector: 'demo-main',
+  selector: 'social-app',
   template: `
-    <h1>social app component template</h1> 
-    <router-outlet></router-outlet>`,
-  directives: [ROUTER_DIRECTIVES]
+    <demo-nav></demo-nav> 
+    <router-outlet></router-outlet>
+    `,
+  directives: [ROUTER_DIRECTIVES, NavComponent]
 })
 export class AppComponent {}
