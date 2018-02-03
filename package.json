@@ -10,7 +10,8 @@
   },
   "license": "ISC",
   "scripts": {
-    "lite": "lite-server"
+    "lite": "lite-server",
+    "dummy" : "nonsense"
   },
   "dependencies": {
     "@angular/common": "2.0.0-rc.4",
